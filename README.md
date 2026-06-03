@@ -22,6 +22,22 @@
 - Backend-ready：Firebase Authentication、Firestore、Cloud Storage
 - Hosting：Firebase Hosting，可接 GoDaddy 自訂網域，例如 `app.xxx.com`
 
+## 專案結構
+
+```text
+.
+├── index.html          # 目前可直接開啟預覽的靜態 MVP 原型
+├── styles.css          # 靜態原型樣式
+├── app.js              # 靜態原型互動邏輯
+├── app/                # Next.js App Router 頁面
+├── lib/                # Firebase 與資料型別設定
+├── .env.example        # Firebase 環境變數範本
+├── package.json        # 專案套件與啟動指令
+└── README.md           # 專案說明
+```
+
+`.next`、`node_modules`、`.DS_Store` 等本機產物已列入 `.gitignore`，不需要上傳到 GitHub。
+
 ## 開發啟動
 
 ```bash

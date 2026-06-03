@@ -44,6 +44,7 @@ const addendum={
 
 const GAS_REMINDER_ENDPOINT='';
 let curProjId=1,curFilter='all',defectQuery='',currentPhoto='',pendingDefectData=null;
+let projectQuery='',projectDesignerFilter='',projectStatusFilter='',defectDesignerFilter='';
 let editingProjectId=null,editingDefectId=null,editingAddendumId=null;
 
 // ── LOGIN ──
@@ -91,10 +92,12 @@ function showView(name){
   }
 
   if(name==='projects'){
+    populateSmartFilters();
     renderDashboard();
     renderProjects();
   }
   if(name==='defects'){
+    populateSmartFilters();
     syncProjectHeader();
     renderProjectTabs('defect-project-tabs');
     renderDefects();
@@ -118,10 +121,13 @@ function setMnav(el){
 }
 
 // ── RENDER PROJECTS ──
-function renderProjects(q=''){
+function renderProjects(q=projectQuery){
+  projectQuery=q;
   const list=document.getElementById('project-list');
   const filtered=projects
     .filter(p=>!q||p.name.includes(q)||p.client.includes(q)||(p.designer||'').includes(q))
+    .filter(p=>!projectDesignerFilter||(p.designer||'')===projectDesignerFilter)
+    .filter(p=>!projectStatusFilter||p.status===projectStatusFilter)
     .sort((a,b)=>new Date(b.date)-new Date(a.date));
   if(!filtered.length){
     list.innerHTML=`<div class="empty"><div class="empty-icon"><svg width="44" height="44" viewBox="0 0 24 24" class="icon-line" stroke-width="1.2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3H8M12 3v4"/></svg></div><div class="empty-title">找不到符合的專案</div><div class="empty-desc">試試其他關鍵字</div></div>`;
@@ -163,16 +169,20 @@ function renderDashboard(){
   document.getElementById('stat-pending-defects').textContent=pending;
   document.getElementById('stat-done-defects').textContent=done;
 
-  document.getElementById('overview-list').innerHTML=projects
-    .map(p=>{
-      const list=defects[p.id]||[];
-      const pendingCount=list.filter(x=>x.status==='pending').length;
-      const next=list.filter(x=>x.status==='pending'&&x.deadline).sort((a,b)=>new Date(a.deadline)-new Date(b.deadline))[0];
-      return `<div class="overview-item">
-        <div><strong>${p.name}</strong><span>${p.designer||'未指定'} · ${pendingCount} 待辦</span></div>
-        <small>${next?`最近期限 ${next.deadline}`:'無待辦期限'}</small>
-      </div>`;
-    }).join('');
+  const recent=projects.flatMap(p=>(defects[p.id]||[])
+    .filter(x=>x.status==='pending')
+    .map(x=>({...x,project:p.name,designer:p.designer||'未指定'})))
+    .sort((a,b)=>new Date(a.deadline||'2999-12-31')-new Date(b.deadline||'2999-12-31'))
+    .slice(0,5);
+  document.getElementById('overview-list').innerHTML=recent.length?recent.map(x=>`
+    <div class="overview-item">
+      <div>
+        <strong>${x.content}</strong>
+        <span>${x.project} · ${x.designer} · ${x.trade||'其他'}</span>
+      </div>
+      <small>${x.deadline?`期限 ${x.deadline}`:'未設期限'}</small>
+    </div>
+  `).join(''):'<div class="empty-inline">目前沒有待改善缺失</div>';
 
   const events=projects.flatMap(p=>(defects[p.id]||[])
     .filter(x=>x.status==='pending'&&x.deadline)
@@ -217,6 +227,75 @@ function selectCalendarDate(date){
 
 function filterProjects(v){renderProjects(v)}
 
+function filterProjectsByDesigner(v){
+  projectDesignerFilter=v;
+  renderProjects();
+}
+
+function filterProjectsByStatus(v){
+  projectStatusFilter=v;
+  renderProjects();
+}
+
+function populateSmartFilters(){
+  const designers=[...new Set(projects.map(p=>p.designer).filter(Boolean))];
+  const designerOptions='<option value="">所有設計師</option>'+designers.map(name=>`<option value="${name}">${name}</option>`).join('');
+  const projectDesigner=document.getElementById('project-designer-filter');
+  if(projectDesigner){
+    projectDesigner.innerHTML=designerOptions;
+    projectDesigner.value=projectDesignerFilter;
+  }
+  const defectDesigner=document.getElementById('defect-designer-filter');
+  if(defectDesigner){
+    defectDesigner.innerHTML=designerOptions;
+    defectDesigner.value=defectDesignerFilter;
+  }
+  const projectStatus=document.getElementById('project-status-filter');
+  if(projectStatus) projectStatus.value=projectStatusFilter;
+  const defectProject=document.getElementById('defect-project-filter');
+  if(defectProject){
+    defectProject.innerHTML='<option value="">選擇專案</option>'+projects.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
+    defectProject.value=String(curProjId);
+  }
+  const projectList=document.getElementById('project-search-list');
+  if(projectList) projectList.innerHTML=projects.map(p=>`<option value="${p.name}">${p.client} · ${p.designer||'未指定'}</option>`).join('');
+  const defectList=document.getElementById('defect-search-list');
+  if(defectList){
+    const suggestions=projects.flatMap(p=>(defects[p.id]||[]).map(x=>x.content)).concat(designers,trades);
+    defectList.innerHTML=[...new Set(suggestions)].map(v=>`<option value="${v}"></option>`).join('');
+  }
+}
+
+function selectProjectFromFilter(v){
+  if(!v) return;
+  curProjId=Number(v);
+  defectDesignerFilter='';
+  const designerSelect=document.getElementById('defect-designer-filter');
+  if(designerSelect) designerSelect.value='';
+  renderProjectTabs('defect-project-tabs');
+  syncProjectHeader();
+  renderDefects();
+}
+
+function filterDefectsDesigner(v){
+  defectDesignerFilter=v;
+  if(!v){
+    renderDefects();
+    return;
+  }
+  const project=projects
+    .filter(p=>(p.designer||'')===v)
+    .sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
+  if(project){
+    curProjId=project.id;
+    const projectSelect=document.getElementById('defect-project-filter');
+    if(projectSelect) projectSelect.value=String(project.id);
+    renderProjectTabs('defect-project-tabs');
+    syncProjectHeader();
+  }
+  renderDefects();
+}
+
 function openProject(id){
   curProjId=id;
   showView('defects');
@@ -230,6 +309,11 @@ function selectProject(id,view='defects'){
     renderPDF();
     return;
   }
+  defectDesignerFilter='';
+  const designerSelect=document.getElementById('defect-designer-filter');
+  if(designerSelect) designerSelect.value='';
+  const projectSelect=document.getElementById('defect-project-filter');
+  if(projectSelect) projectSelect.value=String(curProjId);
   renderProjectTabs('defect-project-tabs');
   renderDefects();
 }
