@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="zh-TW" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>驗收管理系統｜三彡川空間設計</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Serif+TC:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   三彡川空間設計 × Apple × Minimal Line-icon UI
+   Brand Navy #05334b · Pure White · Precision Typography
+   ============================================================ */
+
+:root {
+  --brand:          #05334b;
+  --brand-mid:      #0a4a6e;
+  --brand-light:    #1a6a96;
+  --brand-pale:     #e8f1f7;
+  --brand-paler:    #f2f7fb;
+  --bg:             #f5f5f7;
+  --surface:        #ffffff;
+  --surface-2:      #fafafa;
+  --divider:        rgba(0,0,0,0.07);
+  --border:         rgba(0,0,0,0.10);
+  --border-solid:   #e5e5ea;
+  --text-1:         #1d1d1f;
+  --text-2:         #6e6e73;
+  --text-3:         #aeaeb2;
+  --text-on-brand:  #ffffff;
+  --green:          #34c759;
+  --green-bg:       #f0faf3;
+  --orange:         #ff9f0a;
+  --orange-bg:      #fff8ed;
+  --red:            #ff3b30;
+  --red-bg:         #fff0ef;
+  --blue:           #007aff;
+  --blue-bg:        #f0f6ff;
+
+  --r-xs:  6px; --r-sm: 10px; --r-md: 14px; --r-lg: 18px; --r-xl: 22px; --r-2xl: 28px;
+  --s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:20px;--s6:24px;--s8:32px;--s10:40px;--s12:48px;
+  --font: 'Noto Sans TC',-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;
+  --font-serif: 'Noto Serif TC','Georgia',serif;
+  --shadow-xs: 0 1px 4px rgba(0,0,0,0.05),0 0 0 1px rgba(0,0,0,0.04);
+  --shadow-sm: 0 2px 10px rgba(0,0,0,0.06),0 0 0 1px rgba(0,0,0,0.04);
+  --shadow-md: 0 6px 20px rgba(0,0,0,0.08),0 1px 4px rgba(0,0,0,0.04);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.10),0 2px 8px rgba(0,0,0,0.04);
+  --t: 180ms cubic-bezier(0.25,0.46,0.45,0.94);
+  --spring: 320ms cubic-bezier(0.34,1.56,0.64,1);
+}
+[data-theme="dark"] {
+  --brand:          #5aacce;
+  --brand-mid:      #4a9cc0;
+  --brand-pale:     #0f2d40;
+  --brand-paler:    #091e2c;
+  --bg:             #000000;
+  --surface:        #1c1c1e;
+  --surface-2:      #2c2c2e;
+  --divider:        rgba(255,255,255,0.09);
+  --border:         rgba(255,255,255,0.13);
+  --border-solid:   #3a3a3c;
+  --text-1:         #f5f5f7;
+  --text-2:         #aeaeb2;
+  --text-3:         #636366;
+  --green:          #30d158;  --green-bg: #0d2e17;
+  --orange:         #ff9f0a;  --orange-bg:#2e1f00;
+  --red:            #ff453a;  --red-bg:   #2e0e0d;
+  --blue:           #0a84ff;  --blue-bg:  #00133a;
+  --shadow-xs:0 1px 4px rgba(0,0,0,0.3);
+  --shadow-sm:0 2px 10px rgba(0,0,0,0.4);
+  --shadow-md:0 6px 20px rgba(0,0,0,0.45);
+  --shadow-lg:0 12px 40px rgba(0,0,0,0.5);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+html{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+body{font-family:var(--font);font-size:16px;color:var(--text-1);background:var(--bg);line-height:1.5}
+img{display:block;max-width:100%}
+button{cursor:pointer;background:none;border:none;font:inherit;color:inherit}
+input,textarea,select{font:inherit;color:inherit}
+a{text-decoration:none;color:inherit}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border-solid);border-radius:2px}
+button,:where([role="button"]){transition:opacity var(--t),background var(--t),color var(--t),box-shadow var(--t),transform var(--t),border-color var(--t)}
+
+/* ── PAGE ROUTING ── */
+.page{display:none;height:100dvh;overflow:hidden;flex-direction:column}
+.page.active{display:flex}
+
+/* ============================================================  LOGIN  */
+#page-login{background:var(--brand);align-items:center;justify-content:center;position:relative;overflow:hidden}
+#page-login::before,#page-login::after{content:'';position:absolute;border-radius:50%;background:rgba(255,255,255,0.04)}
+#page-login::before{width:700px;height:700px;top:-40%;right:-20%}
+#page-login::after{width:450px;height:450px;bottom:-25%;left:-15%}
+.login-card{
+  background:var(--surface);border-radius:var(--r-2xl);padding:var(--s12) var(--s10);
+  width:min(420px,92vw);box-shadow:var(--shadow-lg);position:relative;z-index:1;
+  display:flex;flex-direction:column;gap:var(--s6);
+}
+.login-logo-wrap{display:flex;flex-direction:column;align-items:center;gap:var(--s4)}
+.login-logo-img{height:52px;width:auto;object-fit:contain}
+.login-divider{height:1px;background:var(--divider)}
+.login-heading{font-size:1.25rem;font-weight:700;text-align:center;letter-spacing:-0.02em}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:0.8125rem;font-weight:600;color:var(--text-2);letter-spacing:0.01em}
+.field input,.field textarea,.field select{
+  background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r-sm);
+  padding:11px 14px;font-size:0.9375rem;outline:none;width:100%;
+  transition:border-color var(--t),box-shadow var(--t);
+}
+.field input:focus,.field textarea:focus,.field select:focus{
+  border-color:var(--brand);box-shadow:0 0 0 3px rgba(5,51,75,0.10);
+}
+[data-theme="dark"] .field input:focus,[data-theme="dark"] .field textarea:focus{box-shadow:0 0 0 3px rgba(90,172,206,0.18)}
+.field textarea{resize:vertical;min-height:72px;line-height:1.6}
+.field select{
+  appearance:none;cursor:pointer;padding-right:38px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7' viewBox='0 0 11 7'%3E%3Cpath d='M1 1l4.5 4.5L10 1' stroke='%23aeaeb2' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 14px center;
+}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border-radius:var(--r-sm);padding:10px 18px;font-size:0.875rem;font-weight:600;cursor:pointer;border:none;letter-spacing:0.005em}
+.btn-primary{background:var(--brand);color:#fff}
+.btn-primary:hover{background:var(--brand-mid);box-shadow:var(--shadow-sm)}
+.btn-primary:active{transform:scale(0.98);opacity:0.92}
+.btn-secondary{background:var(--surface-2);color:var(--text-1);border:1.5px solid var(--border)}
+.btn-secondary:hover{background:var(--bg)}
+.btn-ghost{background:transparent;color:var(--brand);padding:8px 12px}
+.btn-ghost:hover{background:var(--brand-pale)}
+.btn-danger{background:var(--red-bg);color:var(--red)}
+.btn-danger:hover{background:var(--red);color:#fff}
+.btn-lg{padding:13px 22px;font-size:1rem;border-radius:var(--r-md)}
+.btn-full{width:100%}
+.btn-icon{width:36px;height:36px;border-radius:var(--r-sm);padding:0;background:transparent;color:var(--text-2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.btn-icon:hover{background:var(--bg);color:var(--text-1)}
+.login-footer-text{text-align:center;font-size:0.75rem;color:var(--text-3)}
+
+/* ============================================================  SHELL  */
+.shell{display:grid;grid-template-columns:220px 1fr;height:100dvh;overflow:hidden}
+
+/* ── SIDEBAR ── */
+.sidebar{background:var(--surface);border-right:1px solid var(--divider);display:flex;flex-direction:column;overflow-y:auto;overscroll-behavior:contain}
+.sidebar-top{padding:var(--s5) var(--s4) var(--s4);border-bottom:1px solid var(--divider)}
+.sidebar-logo{height:36px;width:auto;object-fit:contain;display:block}
+.sidebar-sub{font-size:10px;color:var(--text-3);letter-spacing:0.05em;margin-top:5px}
+.nav-group-label{font-size:9.5px;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:var(--text-3);padding:var(--s4) var(--s4) var(--s2)}
+.nav-item{
+  display:flex;align-items:center;gap:10px;padding:9px 14px;
+  margin:1px var(--s3);border-radius:var(--r-sm);font-size:0.875rem;font-weight:500;
+  color:var(--text-2);cursor:pointer;user-select:none;
+}
+.nav-item:hover{background:var(--bg);color:var(--text-1)}
+.nav-item.active{background:var(--brand-pale);color:var(--brand)}
+.nav-badge{
+  margin-left:auto;background:var(--brand);color:#fff;font-size:10px;font-weight:700;
+  min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 5px;
+}
+.nav-badge.orange{background:var(--orange)}
+.sidebar-footer{margin-top:auto;padding:var(--s4);border-top:1px solid var(--divider);display:flex;align-items:center;gap:10px}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;flex-shrink:0}
+.user-info{flex:1;min-width:0}
+.user-name{font-size:0.8125rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-role{font-size:10px;color:var(--text-3)}
+.theme-btn{width:32px;height:32px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;color:var(--text-3);flex-shrink:0}
+.theme-btn:hover{background:var(--bg);color:var(--text-1)}
+
+/* ── MAIN ── */
+.main{display:flex;flex-direction:column;overflow:hidden;background:var(--bg)}
+.topbar{
+  background:rgba(255,255,255,0.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--divider);height:58px;padding:0 var(--s8);
+  display:flex;align-items:center;justify-content:space-between;gap:var(--s4);flex-shrink:0;position:sticky;top:0;z-index:20;
+}
+[data-theme="dark"] .topbar{background:rgba(28,28,30,0.88)}
+.topbar-left{display:flex;align-items:center;gap:10px}
+.topbar-title{font-size:1.0625rem;font-weight:700;letter-spacing:-0.02em}
+.topbar-actions{display:flex;align-items:center;gap:var(--s2)}
+.content{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:var(--s8)}
+
+/* ============================================================  STATS  */
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s4);margin-bottom:var(--s8)}
+.stat-card{background:var(--surface);border-radius:var(--r-lg);padding:var(--s5);box-shadow:var(--shadow-xs);display:flex;flex-direction:column;gap:var(--s1)}
+.stat-icon-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--s2)}
+.stat-icon-wrap{width:36px;height:36px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center}
+.stat-value{font-size:1.875rem;font-weight:700;letter-spacing:-0.04em;line-height:1}
+.stat-label{font-size:0.75rem;color:var(--text-2);font-weight:500;letter-spacing:0.01em}
+
+/* ── SECTION HEADER ── */
+.section-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--s4)}
+.section-title{font-size:0.9375rem;font-weight:700;color:var(--text-1)}
+.search-wrap{
+  display:flex;align-items:center;gap:var(--s2);background:var(--surface);
+  border:1.5px solid var(--border);border-radius:var(--r-lg);padding:7px 14px;
+  transition:border-color var(--t),box-shadow var(--t);
+}
+.search-wrap:focus-within{border-color:var(--brand);box-shadow:0 0 0 3px rgba(5,51,75,0.08)}
+.search-wrap input{border:none;background:transparent;outline:none;font-size:0.875rem;width:180px;color:var(--text-1)}
+.search-wrap input::placeholder{color:var(--text-3)}
+
+/* ============================================================  PROJECT CARDS  */
+.project-list{display:flex;flex-direction:column;gap:10px}
+.project-card{
+  background:var(--surface);border-radius:var(--r-lg);padding:var(--s5) var(--s6);
+  box-shadow:var(--shadow-xs);cursor:pointer;
+  display:grid;grid-template-columns:1fr auto;align-items:center;gap:var(--s4);
+  border:1.5px solid transparent;transition:box-shadow var(--t),border-color var(--t),transform var(--t);
+}
+.project-card:hover{box-shadow:var(--shadow-md);border-color:var(--brand-pale);transform:translateY(-1px)}
+.project-card:active{transform:none}
+.project-name{font-size:0.9375rem;font-weight:700;letter-spacing:-0.01em;margin-bottom:3px}
+.project-client{font-size:0.8125rem;color:var(--text-2)}
+.project-tags{display:flex;align-items:center;gap:7px;margin-top:10px;flex-wrap:wrap}
+.tag{font-size:11px;font-weight:600;padding:3px 10px;border-radius:6px;letter-spacing:0.01em;display:inline-flex;align-items:center;gap:4px}
+.tag-progress{background:var(--blue-bg);color:var(--blue)}
+.tag-done{background:var(--green-bg);color:var(--green)}
+.tag-pending{background:var(--orange-bg);color:var(--orange)}
+.tag-neutral{background:var(--bg);color:var(--text-2);border:1px solid var(--border)}
+.project-right{display:flex;flex-direction:column;align-items:flex-end;gap:7px}
+.prog-bar{width:72px;height:3px;background:var(--bg);border-radius:2px;overflow:hidden;border:1px solid var(--border-solid)}
+.prog-fill{height:100%;border-radius:2px;background:var(--green);transition:width 0.7s ease}
+.prog-label{font-size:10.5px;color:var(--text-3)}
+
+/* ============================================================  DETAIL / DEFECTS  */
+.detail-hd{
+  background:var(--surface);border-radius:var(--r-xl);padding:var(--s6);
+  margin-bottom:var(--s6);box-shadow:var(--shadow-xs);
+  display:flex;align-items:flex-start;justify-content:space-between;gap:var(--s5);flex-wrap:wrap;
+}
+.detail-project-name{font-size:1.25rem;font-weight:700;letter-spacing:-0.02em;margin-bottom:4px}
+.meta-row{display:flex;align-items:center;gap:var(--s4);flex-wrap:wrap;margin-top:10px}
+.meta-item{display:flex;align-items:center;gap:5px;font-size:0.8125rem;color:var(--text-2)}
+.detail-actions{display:flex;gap:var(--s2);flex-shrink:0}
+
+.filters{display:flex;gap:var(--s2);margin-bottom:var(--s5);overflow-x:auto;padding-bottom:2px}
+.chip{padding:6px 16px;border-radius:100px;font-size:0.8125rem;font-weight:600;border:1.5px solid var(--border);color:var(--text-2);cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all var(--t)}
+.chip:hover{border-color:var(--brand);color:var(--brand)}
+.chip.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+
+.defect-list{display:flex;flex-direction:column;gap:10px}
+.defect-card{
+  background:var(--surface);border-radius:var(--r-lg);padding:var(--s5);
+  box-shadow:var(--shadow-xs);border-left:3px solid transparent;cursor:pointer;
+  display:grid;grid-template-columns:1fr auto;gap:var(--s4);align-items:start;
+  transition:box-shadow var(--t),border-color var(--t);
+}
+.defect-card:hover{box-shadow:var(--shadow-md)}
+.defect-card.pending{border-left-color:var(--orange)}
+.defect-card.done{border-left-color:var(--green)}
+.defect-no{font-size:10px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--text-3);margin-bottom:4px}
+.defect-title{font-size:0.9375rem;font-weight:600;color:var(--text-1);margin-bottom:6px}
+.defect-note-text{font-size:0.8125rem;color:var(--text-2);line-height:1.5}
+.defect-footer-row{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
+.defect-photo-thumb{
+  width:68px;height:68px;border-radius:var(--r-sm);background:var(--bg);
+  display:flex;align-items:center;justify-content:center;color:var(--text-3);
+  border:1px solid var(--border);flex-shrink:0;overflow:hidden;
+}
+.deadline-text{font-size:11px;color:var(--text-3);display:flex;align-items:center;gap:4px}
+.deadline-text.urgent{color:var(--red)}
+
+/* ============================================================  PANEL (bottom sheet)  */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.38);backdrop-filter:blur(6px);z-index:100;align-items:flex-end;justify-content:center}
+.overlay.open{display:flex}
+.panel{
+  background:var(--surface);border-radius:var(--r-2xl) var(--r-2xl) 0 0;
+  width:min(680px,100vw);max-height:94dvh;overflow-y:auto;
+  padding:var(--s3) var(--s8) calc(var(--s12) + env(safe-area-inset-bottom));
+  box-shadow:0 -6px 40px rgba(0,0,0,0.14);
+  transform:translateY(100%);transition:transform 360ms cubic-bezier(0.34,1.56,0.64,1);
+}
+.overlay.open .panel{transform:translateY(0)}
+.panel-handle{width:36px;height:4px;background:var(--border-solid);border-radius:2px;margin:0 auto var(--s5)}
+.panel-title{font-size:1.25rem;font-weight:700;letter-spacing:-0.02em;margin-bottom:var(--s6)}
+.form-grid{display:flex;flex-direction:column;gap:var(--s5)}
+.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:var(--s4)}
+.photo-drop{
+  border:1.5px dashed var(--border-solid);border-radius:var(--r-lg);padding:var(--s8) var(--s6);
+  text-align:center;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:var(--s2);
+  transition:border-color var(--t),background var(--t);
+}
+.photo-drop:hover{border-color:var(--brand);background:var(--brand-paler)}
+.photo-drop-icon{color:var(--text-3);margin-bottom:4px}
+.photo-drop-text{font-size:0.875rem;color:var(--text-2);font-weight:500}
+.photo-drop-hint{font-size:0.75rem;color:var(--text-3)}
+.form-actions{display:flex;gap:10px;margin-top:4px}
+
+/* ============================================================  MOBILE NAV  */
+.mobile-nav{
+  display:none;position:fixed;bottom:0;left:0;right:0;
+  background:rgba(255,255,255,0.9);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-top:1px solid var(--divider);z-index:50;
+  padding:var(--s2) 0 calc(var(--s2) + env(safe-area-inset-bottom));
+}
+[data-theme="dark"] .mobile-nav{background:rgba(28,28,30,0.92)}
+.mobile-nav-inner{display:grid;grid-template-columns:repeat(4,1fr)}
+.mnav-item{display:flex;flex-direction:column;align-items:center;gap:3px;padding:var(--s2);cursor:pointer;color:var(--text-3);font-size:10px;font-weight:600;transition:color var(--t)}
+.mnav-item.active{color:var(--brand)}
+.mnav-item svg{transition:transform var(--spring)}
+.mnav-item.active svg{transform:scale(1.08)}
+
+/* ============================================================  PDF PREVIEW  */
+.pdf-wrap{max-width:860px;margin:0 auto;background:var(--surface);border-radius:var(--r-xl);box-shadow:var(--shadow-lg);overflow:hidden}
+.pdf-topbar{background:var(--brand);padding:12px var(--s6);display:flex;align-items:center;justify-content:space-between;gap:var(--s4)}
+.pdf-topbar-title{font-size:0.875rem;font-weight:600;color:rgba(255,255,255,0.9)}
+.pdf-topbar-btns{display:flex;gap:var(--s2)}
+.pdf-btn{padding:6px 14px;border-radius:var(--r-sm);font-size:0.75rem;font-weight:600;background:rgba(255,255,255,0.14);color:#fff;border:1px solid rgba(255,255,255,0.2);cursor:pointer;transition:background var(--t);display:flex;align-items:center;gap:5px}
+.pdf-btn:hover{background:rgba(255,255,255,0.24)}
+
+/* ── PAGE TABS ── */
+.pdf-tabs{display:flex;border-bottom:1px solid #e5e5ea;background:#fafafa}
+.pdf-tab{padding:10px var(--s6);font-size:0.8125rem;font-weight:600;color:#aeaeb2;cursor:pointer;border-bottom:2px solid transparent;transition:color var(--t),border-color var(--t);white-space:nowrap}
+.pdf-tab.active{color:#05334b;border-bottom-color:#05334b}
+
+.pdf-page{display:none;padding:var(--s10) var(--s12)}
+.pdf-page.active{display:block}
+
+/* ── PDF SHARED ── */
+.pdf-letterhead{display:flex;align-items:flex-start;justify-content:space-between;padding-bottom:var(--s6);border-bottom:2px solid #05334b;margin-bottom:var(--s8)}
+.pdf-logo-img{height:44px;width:auto;object-fit:contain}
+.pdf-report-meta{text-align:right}
+.pdf-report-no{font-size:11px;color:#888;letter-spacing:0.04em}
+.pdf-report-type{font-size:0.875rem;font-weight:700;color:#05334b;margin-top:2px}
+.pdf-title{font-size:1.25rem;font-weight:700;color:#1d1d1f;letter-spacing:-0.01em;margin-bottom:var(--s6)}
+.pdf-info-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--s4) var(--s8);margin-bottom:var(--s8);padding:var(--s5) var(--s6);background:#f8f8f8;border-radius:10px}
+.pdf-info-item{display:flex;flex-direction:column;gap:3px}
+.pdf-info-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#aeaeb2}
+.pdf-info-value{font-size:0.875rem;font-weight:600;color:#1d1d1f}
+.pdf-section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#05334b;margin-bottom:var(--s3)}
+
+/* ── PDF TABLE ── */
+.pdf-table{width:100%;border-collapse:collapse;font-size:0.8125rem}
+.pdf-table thead{background:#05334b;color:#fff}
+.pdf-table th{padding:9px 10px;font-weight:700;font-size:10px;letter-spacing:0.06em;text-transform:uppercase;text-align:left;white-space:nowrap}
+.pdf-table th:first-child{border-radius:7px 0 0 7px}
+.pdf-table th:last-child{border-radius:0 7px 7px 0}
+.pdf-table td{padding:10px;vertical-align:middle;border-bottom:1px solid #f0f0f0;color:#1d1d1f}
+.pdf-table tbody tr:hover{background:#fafafa}
+.pdf-table tbody tr:last-child td{border-bottom:none}
+.pdf-table .col-no{width:44px;text-align:center;font-weight:700;color:#05334b}
+.pdf-table .col-check{width:52px;text-align:center}
+.pdf-table .col-qty{width:56px;text-align:center}
+.pdf-table .col-img{width:70px;text-align:center}
+.pdf-table .col-note{width:100px}
+.check-box{
+  width:18px;height:18px;border:1.5px solid #d0d0d0;border-radius:4px;
+  display:inline-flex;align-items:center;justify-content:center;cursor:pointer;
+  background:#fff;transition:all 0.2s;flex-shrink:0;
+}
+.check-box.checked{background:#05334b;border-color:#05334b}
+.img-placeholder{
+  width:52px;height:40px;background:#f5f5f5;border-radius:5px;
+  display:flex;align-items:center;justify-content:center;color:#d0d0d0;margin:0 auto;border:1px solid #eee;
+}
+.pdf-status-badge{display:inline-block;padding:2px 9px;border-radius:5px;font-size:10.5px;font-weight:700}
+.pdf-badge-pending{background:#fff3e0;color:#e65100}
+.pdf-badge-done{background:#e8f5e9;color:#2e7d32}
+.pdf-footer{margin-top:var(--s10);padding-top:var(--s5);border-top:1px solid #ebebeb;display:flex;align-items:flex-end;justify-content:space-between}
+.pdf-footer-text{font-size:10.5px;color:#bbb}
+.pdf-sign-box{text-align:center}
+.pdf-sign-line{width:120px;height:1px;background:#333;margin:0 auto var(--s2)}
+.pdf-sign-label{font-size:10px;color:#888}
+
+/* ── ADDENDUM ── */
+.addendum-banner{
+  background:#fff8ed;border:1px solid #ffe0b2;border-radius:8px;
+  padding:10px var(--s5);margin-bottom:var(--s6);display:flex;align-items:center;gap:10px;
+  font-size:0.8125rem;color:#e65100;font-weight:600;
+}
+
+/* ============================================================  EMPTY  */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px var(--s8);gap:var(--s4);text-align:center}
+.empty-icon{color:var(--text-3);opacity:0.35}
+.empty-title{font-size:1rem;font-weight:700;color:var(--text-1)}
+.empty-desc{font-size:0.875rem;color:var(--text-2);max-width:28ch}
+
+/* ============================================================  RESPONSIVE  */
+@media(max-width:840px){
+  .shell{grid-template-columns:1fr}
+  .sidebar{display:none}
+  .mobile-nav{display:block}
+  .content{padding:var(--s5) var(--s4);padding-bottom:90px}
+  .topbar{padding:0 var(--s5)}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .stats-grid .stat-card:nth-child(3){display:none}
+  .detail-hd{flex-direction:column}
+  .detail-actions{width:100%}
+  .form-row-2{grid-template-columns:1fr}
+  .pdf-page{padding:var(--s6) var(--s4)}
+  .pdf-info-grid{grid-template-columns:1fr}
+  .pdf-table .col-img,.pdf-table .col-note{display:none}
+  .pdf-letterhead{flex-direction:column;gap:var(--s3)}
+}
+@media(max-width:480px){
+  .login-card{padding:var(--s8) var(--s5)}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .project-card{grid-template-columns:1fr}
+  .project-right{flex-direction:row;align-items:center;width:100%}
+  .panel{padding:var(--s3) var(--s4) calc(var(--s12) + env(safe-area-inset-bottom))}
+  .search-wrap input{width:130px}
+}
+
+/* ── LINE ICONS: fine-stroke style ── */
+.icon-line{stroke:currentColor;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── PRINT ── */
+@media print{
+  .topbar,.sidebar,.mobile-nav,.pdf-topbar,.pdf-tabs,.shell > aside,.main > .topbar{display:none!important}
+  body,html{overflow:auto!important;height:auto!important}
+  .page{display:block!important;height:auto!important;overflow:visible!important}
+  #page-app{display:block!important}
+  .shell{display:block!important}
+  .main{display:block!important;overflow:visible!important}
+  .content{overflow:visible!important;padding:0!important}
+  #view-pdf{display:block!important}
+  #view-projects,#view-defects{display:none!important}
+  .pdf-wrap{box-shadow:none!important;border-radius:0!important}
+  .pdf-page{display:block!important;page-break-before:always}
+  .pdf-page:first-child{page-break-before:avoid}
+  .overlay{display:none!important}
+}
+</style>
+</head>
+<body>
+
+<!-- ============================= LOGIN ============================= -->
+<div id="page-login" class="page active">
+  <div class="login-card">
+    <div class="login-logo-wrap">
+      <img src="https://shanchuandesign.com/wp-content/uploads/2026/02/logo_頁首.png"
+           alt="三彡川空間設計" class="login-logo-img"
+           onerror="this.onerror=null;this.parentNode.insertAdjacentHTML('afterbegin','<div style=\'font-size:1.1rem;font-weight:700;color:#05334b;letter-spacing:-0.01em\'>三彡川空間設計</div>');this.remove()">
+      <div class="login-divider" style="width:100%"></div>
+    </div>
+    <div class="login-heading">工地驗收管理系統</div>
+    <form onsubmit="handleLogin(event)">
+      <div class="form-grid" style="gap:var(--s4)">
+        <div class="field">
+          <label>帳號（Email）</label>
+          <input type="email" placeholder="name@shanchuan.com" value="admin@shanchuan.com" autocomplete="email">
+        </div>
+        <div class="field" style="margin-top:var(--s2)">
+          <label>密碼</label>
+          <input type="password" placeholder="••••••••" value="password" autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn btn-primary btn-lg btn-full" style="margin-top:var(--s4)">
+          登入
+          <svg width="16" height="16" viewBox="0 0 24 24" class="icon-line" stroke-width="2.2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+    </form>
+    <div class="login-footer-text">© 2025 三彡川空間設計 · 內部系統</div>
+  </div>
+</div>
+
+<!-- ============================= APP SHELL ============================= -->
+<div id="page-app" class="page">
+  <div class="shell">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-top">
+        <img src="https://shanchuandesign.com/wp-content/uploads/2026/02/logo_頁首.png"
+             alt="三彡川空間設計" class="sidebar-logo"
+             onerror="this.onerror=null;this.insertAdjacentHTML('afterend','<span style=\'font-size:0.875rem;font-weight:700;color:#05334b\'>三彡川空間設計</span>');this.remove()">
+        <div class="sidebar-sub">驗收管理系統</div>
+      </div>
+
+      <div class="nav-group-label">主選單</div>
+      <div class="nav-item active" onclick="showView('projects')" id="snav-projects">
+        <svg width="17" height="17" viewBox="0 0 24 24" class="icon-line" stroke-width="1.7"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        所有專案
+        <span class="nav-badge" id="badge-projects">3</span>
+      </div>
+      <div class="nav-item" onclick="showView('defects')" id="snav-defects">
+        <svg width="17" height="17" viewBox="0 0 24 24" class="icon-line" stroke-width="1.7"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        缺失紀錄
+        <span class="nav-badge orange" id="badge-defects">5</span>
+      </div>
+      <div class="nav-item" onclick="showView('pdf')" id="snav-pdf">
+        <svg width="17" height="17" viewBox="0 0 24 24" class="icon-line" stroke-width="1.7"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        驗收報告
+      </div>
+
+      <div class="nav-group-label" style="margin-top:var(--s2)">系統</div>
+      <div class="nav-item">
+        <svg width="17" height="17" viewBox="0 0 24 24" class="icon-line" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        設定
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="avatar">王</div>
+        <div class="user-info">
+          <div class="user-name">王設計師</div>
+          <div class="user-role">現場負責人</div>
+        </div>
+        <button class="theme-btn" onclick="toggleTheme()">
+          <svg id="theme-icon-side" width="16" height="16" viewBox="0 0 24 24" class="icon-line" stroke-width="1.8"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="btn-icon" id="back-btn" onclick="showView('projects')" style="display:none">
+            <svg width="18" height="18" viewBox="0 0 24 24" class="icon-line" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          </button>
+          <span class="topbar-title" id="topbar-title">所有專案</span>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn-icon" onclick="toggleTheme()">
+            <svg id="theme-icon-top" width="18" height="18" viewBox="0 0 24 24" class="icon-line" stroke-width="1.8"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          </button>
+          <button class="btn btn-primary" id="topbar-action-btn" onclick="handleTopAction()">
+            <svg width="15" height="15" viewBox="0 0 24 24" class="icon-line" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            新增專案
+          </button>
+        </div>
+      </header>
+
+      <div class="content">
+
+        <!-- PROJECTS VIEW -->
+        <div id="view-projects">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon-row">
+                <div class="stat-icon-wrap" style="background:var(--blue-bg)">
+                  <svg width="18" height="18" viewBox="0 0 24 24" class="icon-line" stroke-width="1.8" style="color:var(--blue)"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3H8M12 3v4"/></svg>
+                </div>
+              </div>
+              <div class="stat-value">3</div>
+              <div class="stat-label">進行中專案</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon-row">
+                <div class="stat-icon-wrap" style="background:var(--orange-bg)">
+                  <svg width="18" height="18" viewBox="0 0 24 24" class="icon-line" stroke-width="1.8" style="color:var(--orange)"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </div>
+              </div>
+              <div class="stat-value">8</div>
+              <div class="stat-label">待改善缺失</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon-row">
+                <div class="stat-icon-wrap" style="background:var(--green-bg)">
+                  <svg width="18" height="18" viewBox="0 0 24 24" class="icon-line" stroke-width="1.8" style="color:var(--green)"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                </div>
+              </div>
+              <div class="stat-value">5</div>
+              <div class="stat-label">已完成項目</div>
+            </div>
+          </div>
+
+          <div class="section-hd">
+            <div class="section-title">全部專案</div>
+            <div class="search-wrap">
+              <svg width="15" height="15" viewBox="0 0 24 24" class="icon-line" stroke-width="2" style="color:var(--text-3)"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+              <input type="text" placeholder="搜尋專案或業主..." oninput="filterProjects(this.value)">
+            </div>
+          </div>
+          <div class="project-list" id="project-list"></div>
+        </div>
+
+        <!-- DEFECTS VIEW -->
+        <div id="view-defects" style="display:none">
+          <div class="detail-hd">
+            <div class="detail-info">
+              <div class="detail-project-name" id="detail-proj-name">信義區住宅改造</div>
+              <div class="meta-row">
+                <div class="meta-item">
+                  <svg width="13" height="13" viewBox="0 0 24 24" class="icon-line" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  <span id="detail-client">陳先生</span>
+                </div>
+                <div class="meta-item">
+                  <svg width="13" height="13" viewBox="0 0 24 24" class="icon-line" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  <span id="detail-date">2025-06-01</span>
+                </div>
+                <div class="meta-item">
+                  <svg width="13" height="13" viewBox="0 0 24 24" class="icon-line" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+                  <span id="detail-count">5 項缺失</span>
+                </div>
+              </div>
+            </div>
+            <div class="detail-actions">
+              <button class="btn btn-secondary" onclick="showView('pdf')">
+                <svg width="14" height="14" viewBox="0 0 24 24" class="icon-line" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                輸出報告
+              </button>
+            </div>
+          </div>
+
+          <div class="filters">
+            <div class="chip active" onclick="filterDef('all',this)">全部</div>
+            <div class="chip" onclick="filterDef('pending',this)">待改善</div>
+            <div class="chip" onclick="filterDef('done',this)">已完成</div>
+          </div>
+          <div class="defect-list" id="defect-list"></div>
+        </div>
+
+        <!-- PDF VIEW -->
+        <div id="view-pdf" style="display:none">
+          <div class="pdf-wrap">
+            <div class="pdf-topbar">
+              <div class="pdf-topbar-title">驗收報告 PDF 預覽</div>
+              <div class="pdf-topbar-btns">
+                <button class="pdf-btn" onclick="window.print()">
+                  <svg width="13" height="13" viewBox="0 0 24 24" class="icon-line" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                  列印
+                </button>
+                <button class="pdf-btn">
+                  <svg width="13" height="13" viewBox="0 0 24 24" class="icon-line" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  下載 PDF
+                </button>
+              </div>
+            </div>
+
+            <!-- PAGE TABS -->
+            <div class="pdf-tabs">
+              <div class="pdf-tab active" onclick="switchPdfTab(0,this)">📋 驗收缺失報告</div>
+              <div class="pdf-tab" onclick="switchPdfTab(1,this)">➕ 工程追加單</div>
+            </div>
+
+            <!-- ======= PAGE 1: 驗收缺失報告 ======= -->
+            <div class="pdf-page active" id="pdf-page-0">
+              <div class="pdf-letterhead">
+                <img src="https://shanchuandesign.com/wp-content/uploads/2026/02/logo_頁首.png"
+                     alt="三彡川空間設計" class="pdf-logo-img"
+                     onerror="this.onerror=null;this.insertAdjacentHTML('afterend','<div style=\'font-size:1.1rem;font-weight:700;color:#05334b;letter-spacing:-0.01em\'>三彡川空間設計<br><span style=\'font-size:10px;font-weight:400;color:#888;letter-spacing:0.04em\'>SHAN SHAN CHUAN INTERIOR DESIGN</span></div>');this.remove()">
+                <div class="pdf-report-meta">
+                  <div class="pdf-report-no">報告編號 SSC-2025-001</div>
+                  <div class="pdf-report-type">驗收缺失報告</div>
+                </div>
+              </div>
+
+              <div class="pdf-title">工地驗收缺失紀錄</div>
+              <div class="pdf-info-grid" id="pdf-info-0"></div>
+
+              <div class="pdf-section-title">缺失項目清單</div>
+              <table class="pdf-table" id="pdf-table-0">
+                <thead>
+                  <tr>
+                    <th class="col-no">編號</th>
+                    <th class="col-check">審核</th>
+                    <th>工程內容</th>
+                    <th class="col-qty">數量</th>
+                    <th class="col-img">圖片</th>
+                    <th class="col-note">備註</th>
+                  </tr>
+                </thead>
+                <tbody id="pdf-tbody-0"></tbody>
+              </table>
+
+              <div class="pdf-footer">
+                <div class="pdf-footer-text" id="pdf-footer-date"></div>
+                <div style="display:flex;gap:var(--s10)">
+                  <div class="pdf-sign-box">
+                    <div class="pdf-sign-line"></div>
+                    <div class="pdf-sign-label">業主簽認</div>
+                  </div>
+                  <div class="pdf-sign-box">
+                    <div class="pdf-sign-line"></div>
+                    <div class="pdf-sign-label">設計師確認</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ======= PAGE 2: 工程追加單 ======= -->
+            <div class="pdf-page" id="pdf-page-1">
+              <div class="pdf-letterhead">
+                <img src="https://shanchuandesign.com/wp-content/uploads/2026/02/logo_頁首.png"
+                     alt="三彡川空間設計" class="pdf-logo-img"
+                     onerror="this.onerror=null;this.insertAdjacentHTML('afterend','<div style=\'font-size:1.1rem;font-weight:700;color:#05334b;letter-spacing:-0.01em\'>三彡川空間設計<br><span style=\'font-size:10px;font-weight:400;color:#888;letter-spacing:0.04em\'>SHAN SHAN CHUAN INTERIOR DESIGN</span></div>');this.remove()">
+                <div class="pdf-report-meta">
+                  <div class="pdf-report-no">追加單編號 SSC-ADD-001</div>
+                  <div class="pdf-report-type" style="color:#e65100">工程追加單</div>
+                </div>
+              </div>
+
+              <div class="addendum-banner">
+                <svg width="16" height="16" viewBox="0 0 24 24" class="icon-line" stroke-width="2" style="color:#e65100"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                本追加單為驗收缺失報告之附件，所有追加工程項目需業主書面確認後始得施工。
+              </div>
+
+              <div class="pdf-title">工程追加項目清單</div>
+              <div class="pdf-info-grid" id="pdf-info-1"></div>
+
+              <div class="pdf-section-title">追加工程項目</div>
+              <table class="pdf-table" id="pdf-table-1">
+                <thead>
+                  <tr>
+                    <th class="col-no">編號</th>
+                    <th class="col-check">審核</th>
+                    <th>工程內容</th>
+                    <th class="col-qty">數量</th>
+                    <th class="col-img">圖片</th>
+                    <th class="col-note">備註</th>
+                  </tr>
+                </thead>
+                <tbody id="pdf-tbody-1"></tbody>
+              </table>
+
+              <div class="pdf-footer">
+                <div class="pdf-footer-text">本追加單由三彡川空間設計驗收系統產生</div>
+                <div style="display:flex;gap:var(--s10)">
+                  <div class="pdf-sign-box">
+                    <div class="pdf-sign-line"></div>
+                    <div class="pdf-sign-label">業主簽認</div>
+                  </div>
+                  <div class="pdf-sign-box">
+                    <div class="pdf-sign-line"></div>
+                    <div class="pdf-sign-label">設計師確認</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /.pdf-wrap -->
+        </div><!-- /#view-pdf -->
+
+      </div><!-- /.content -->
+    </main>
+  </div><!-- /.shell -->
+
+  <!-- MOBILE NAV -->
+  <nav class="mobile-nav">
+    <div class="mobile-nav-inner">
+      <div class="mnav-item active" onclick="showView('projects');setMnav(this)">
+        <svg width="22" height="22" viewBox="0 0 24 24" class="icon-line" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        專案
+      </div>
+      <div class="mnav-item" onclick="showView('defects');setMnav(this)">
+        <svg width="22" height="22" viewBox="0 0 24 24" class="icon-line" stroke-width="1.6"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        缺失
+      </div>
+      <div class="mnav-item" onclick="showView('pdf');setMnav(this)">
+        <svg width="22" height="22" viewBox="0 0 24 24" class="icon-line" stroke-width="1.6"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
+        報告
+      </div>
+      <div class="mnav-item">
+        <svg width="22" height="22" viewBox="0 0 24 24" class="icon-line" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M20 21v-1a8 8 0 00-16 0v1"/></svg>
+        帳號
+      </div>
+    </div>
+  </nav>
+</div><!-- /#page-app -->
+
+<!-- ============================= ADD DEFECT PANEL ============================= -->
+<div class="overlay" id="ov-defect" onclick="closeOv('defect',event)">
+  <div class="panel">
+    <div class="panel-handle"></div>
+    <div class="panel-title">新增缺失項目</div>
+    <form class="form-grid" onsubmit="submitDefect(event)">
+      <div class="field">
+        <label>工程內容（缺失描述）<span style="color:var(--red)"> *</span></label>
+        <textarea id="f-content" placeholder="例如：主臥牆面批土不平整，需重新處理..." rows="3" required></textarea>
+      </div>
+      <div class="form-row-2">
+        <div class="field">
+          <label>數量</label>
+          <input type="text" id="f-qty" placeholder="例如：1 式 / 2 處">
+        </div>
+        <div class="field">
+          <label>狀態</label>
+          <select id="f-status">
+            <option value="pending">⏳ 待改善</option>
+            <option value="done">✅ 已完成</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row-2">
+        <div class="field">
+          <label>改善期限</label>
+          <input type="date" id="f-deadline">
+        </div>
+        <div class="field">
+          <label>備註</label>
+          <input type="text" id="f-note" placeholder="負責師傅、注意事項...">
+        </div>
+      </div>
+      <div class="field">
+        <label>現場照片</label>
+        <div class="photo-drop" onclick="document.getElementById('photo-file').click()">
+          <div class="photo-drop-icon">
+            <svg width="34" height="34" viewBox="0 0 24 24" class="icon-line" stroke-width="1.4"><rect x="3" y="3" width="18" height="18" rx="2.5"/><circle cx="8.5" cy="8.5" r="1.8"/><polyline points="21 15 16 10 5 21"/></svg>
+          </div>
+          <div class="photo-drop-text">點擊選擇或拍攝照片</div>
+          <div class="photo-drop-hint">支援 JPG、PNG，自動壓縮上傳</div>
+        </div>
+        <input type="file" id="photo-file" accept="image/*" capture="environment" style="display:none" onchange="previewPhoto(this)">
+        <div id="photo-prev" style="display:none;margin-top:10px"></div>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary btn-lg" style="flex:1">
+          <svg width="15" height="15" viewBox="0 0 24 24" class="icon-line" stroke-width="2.3"><path d="M9 11l3 3L22 4"/></svg>
+          儲存缺失
+        </button>
+        <button type="button" class="btn btn-secondary btn-lg" onclick="closeOv('defect')">取消</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============================= ADD PROJECT PANEL ============================= -->
+<div class="overlay" id="ov-project" onclick="closeOv('project',event)">
+  <div class="panel">
+    <div class="panel-handle"></div>
+    <div class="panel-title">新增驗收專案</div>
+    <form class="form-grid" onsubmit="submitProject(event)">
+      <div class="field">
+        <label>專案名稱<span style="color:var(--red)"> *</span></label>
+        <input type="text" id="p-name" placeholder="例如：大安區辦公室改造" required>
+      </div>
+      <div class="form-row-2">
+        <div class="field">
+          <label>業主名稱</label>
+          <input type="text" id="p-client" placeholder="例如：陳先生">
+        </div>
+        <div class="field">
+          <label>驗收日期</label>
+          <input type="date" id="p-date">
+        </div>
+      </div>
+      <div class="field">
+        <label>備註</label>
+        <textarea id="p-note" placeholder="地址、樓層、注意事項..." rows="2"></textarea>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary btn-lg" style="flex:1">建立專案</button>
+        <button type="button" class="btn btn-secondary btn-lg" onclick="closeOv('project')">取消</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+// ── DATA ──
+const projects=[
+  {id:1,name:'信義區住宅改造',client:'陳先生',date:'2025-06-01',note:'3F/4F 複合式住宅',status:'inprogress'},
+  {id:2,name:'大安區辦公室設計',client:'科技新創有限公司',date:'2025-05-20',note:'整層辦公室翻修',status:'inprogress'},
+  {id:3,name:'內湖透天厝新建',client:'林太太',date:'2025-04-15',note:'B1~4F 全棟',status:'done'},
+];
+const defects={
+  1:[
+    {id:1,content:'主臥室牆面批土不平整，需重新處理',qty:'1 式',status:'pending',deadline:'2025-06-10',note:'師傅王大明負責'},
+    {id:2,content:'廚房磁磚縫隙填縫不均勻',qty:'3 m²',status:'pending',deadline:'2025-06-08',note:''},
+    {id:3,content:'客廳木地板收邊條未固定',qty:'1 處',status:'done',deadline:'2025-06-05',note:'已完工確認'},
+    {id:4,content:'衛浴門縫隙過大，防水不足',qty:'1 樘',status:'pending',deadline:'2025-06-12',note:'需更換密封條'},
+    {id:5,content:'主臥更衣室層架安裝角度偏斜',qty:'2 組',status:'done',deadline:'2025-06-03',note:''},
+  ],
+  2:[
+    {id:1,content:'會議室天花板燈具安裝偏位',qty:'4 盞',status:'pending',deadline:'2025-06-15',note:''},
+    {id:2,content:'接待區地板大理石紋路未對齊',qty:'6 m²',status:'pending',deadline:'2025-06-20',note:'重新排列'},
+    {id:3,content:'茶水間排水管漏水',qty:'1 處',status:'pending',deadline:'2025-06-09',note:'緊急處理'},
+  ],
+  3:[
+    {id:1,content:'外牆塗料顏色與設計稿不符',qty:'全棟',status:'done',deadline:'2025-04-20',note:'已重新噴漆'},
+    {id:2,content:'屋頂防水層施工不完整',qty:'1 式',status:'done',deadline:'2025-04-25',note:''},
+  ],
+};
+const addendum={
+  1:[
+    {id:1,content:'業主要求增加主臥衛浴暖風機',qty:'1 台',status:'pending',deadline:'2025-06-20',note:'需業主確認品牌'},
+    {id:2,content:'玄關增設感應式燈帶',qty:'3 m',status:'pending',deadline:'2025-06-18',note:''},
+    {id:3,content:'廚房增加中島吧台',qty:'1 式',status:'done',deadline:'2025-06-15',note:'報價已確認'},
+  ],
+  2:[
+    {id:1,content:'辦公室增設隔音玻璃隔間',qty:'1 式',status:'pending',deadline:'2025-06-25',note:''},
+  ],
+  3:[],
+};
+
+let curProjId=1,curFilter='all';
+
+// ── LOGIN ──
+function handleLogin(e){
+  e.preventDefault();
+  const btn=e.target.querySelector('button[type=submit]');
+  btn.textContent='登入中…';btn.disabled=true;
+  setTimeout(()=>{showPage('app');showView('projects');},650);
+}
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+}
+
+// ── VIEWS ──
+function showView(name){
+  ['projects','defects','pdf'].forEach(v=>{
+    const el=document.getElementById('view-'+v);
+    if(el) el.style.display='none';
+  });
+  document.getElementById('view-'+name).style.display='';
+
+  const titles={projects:'所有專案',defects:'缺失紀錄',pdf:'驗收報告'};
+  document.getElementById('topbar-title').textContent=titles[name]||name;
+  document.getElementById('back-btn').style.display=name==='projects'?'none':'flex';
+
+  // sidebar highlight
+  document.querySelectorAll('[id^="snav-"]').forEach(n=>n.classList.remove('active'));
+  const sn=document.getElementById('snav-'+name);
+  if(sn) sn.classList.add('active');
+
+  // topbar action button
+  const ab=document.getElementById('topbar-action-btn');
+  if(name==='projects'){
+    ab.style.display='';
+    ab.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" class="icon-line" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增專案';
+  } else if(name==='defects'){
+    ab.style.display='';
+    ab.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" class="icon-line" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增缺失';
+  } else {
+    ab.style.display='none';
+  }
+
+  if(name==='projects') renderProjects();
+  if(name==='defects')  renderDefects();
+  if(name==='pdf')      renderPDF();
+}
+
+function handleTopAction(){
+  const t=document.getElementById('topbar-title').textContent;
+  if(t==='所有專案') openOv('project');
+  else if(t==='缺失紀錄') openOv('defect');
+}
+
+function setMnav(el){
+  document.querySelectorAll('.mnav-item').forEach(n=>n.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ── RENDER PROJECTS ──
+function renderProjects(q=''){
+  const list=document.getElementById('project-list');
+  const filtered=projects.filter(p=>!q||p.name.includes(q)||p.client.includes(q));
+  if(!filtered.length){
+    list.innerHTML=`<div class="empty"><div class="empty-icon"><svg width="44" height="44" viewBox="0 0 24 24" class="icon-line" stroke-width="1.2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3H8M12 3v4"/></svg></div><div class="empty-title">找不到符合的專案</div><div class="empty-desc">試試其他關鍵字</div></div>`;
+    return;
+  }
+  const statusCls={inprogress:'tag-progress',done:'tag-done',pending:'tag-pending'};
+  const statusLbl={inprogress:'進行中',done:'已完成',pending:'待處理'};
+  list.innerHTML=filtered.map(p=>{
+    const d=defects[p.id]||[];
+    const done=d.filter(x=>x.status==='done').length;
+    const pct=d.length?Math.round(done/d.length*100):0;
+    return `<div class="project-card" onclick="openProject(${p.id})">
+      <div>
+        <div class="project-name">${p.name}</div>
+        <div class="project-client">${p.client}</div>
+        <div class="project-tags">
+          <span class="tag ${statusCls[p.status]}">${statusLbl[p.status]}</span>
+          <span class="tag tag-neutral">
+            <svg width="10" height="10" viewBox="0 0 24 24" class="icon-line" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            ${p.date}
+          </span>
+        </div>
+      </div>
+      <div class="project-right">
+        <div class="prog-label">${done}/${d.length} 完成</div>
+        <div class="prog-bar"><div class="prog-fill" style="width:${pct}%"></div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterProjects(v){renderProjects(v)}
+
+function openProject(id){
+  curProjId=id;
+  const p=projects.find(x=>x.id===id);
+  const d=defects[id]||[];
+  document.getElementById('detail-proj-name').textContent=p.name;
+  document.getElementById('detail-client').textContent=p.client;
+  document.getElementById('detail-date').textContent=p.date;
+  document.getElementById('detail-count').textContent=d.length+' 項缺失';
+  showView('defects');
+}
+
+// ── RENDER DEFECTS ──
+function renderDefects(){
+  const list=document.getElementById('defect-list');
+  const d=defects[curProjId]||[];
+  const filtered=d.filter(x=>curFilter==='all'||x.status===curFilter);
+  if(!filtered.length){
+    list.innerHTML=`<div class="empty"><div class="empty-icon"><svg width="40" height="40" viewBox="0 0 24 24" class="icon-line" stroke-width="1.2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div><div class="empty-title">目前沒有缺失</div><div class="empty-desc">點擊「新增缺失」開始紀錄</div></div>`;
+    return;
+  }
+  const today=new Date();
+  list.innerHTML=filtered.map(x=>{
+    const dl=x.deadline?new Date(x.deadline):null;
+    const urgent=dl&&x.status==='pending'&&(dl-today)/(86400000)<3;
+    return `<div class="defect-card ${x.status}" onclick="toggleStatus(${x.id})">
+      <div>
+        <div class="defect-no">缺失 #${String(x.id).padStart(3,'0')}</div>
+        <div class="defect-title">${x.content}</div>
+        ${x.qty?`<div class="defect-note-text">數量：${x.qty}</div>`:''}
+        ${x.note?`<div class="defect-note-text">${x.note}</div>`:''}
+        <div class="defect-footer-row">
+          <span class="tag ${x.status==='pending'?'tag-pending':'tag-done'}">${x.status==='pending'?'⏳ 待改善':'✅ 已完成'}</span>
+          ${x.deadline?`<div class="deadline-text ${urgent?'urgent':''}">
+            <svg width="11" height="11" viewBox="0 0 24 24" class="icon-line" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            期限 ${x.deadline}${urgent?' ⚠️':''}
+          </div>`:''}
+        </div>
+      </div>
+      <div class="defect-photo-thumb">
+        <svg width="20" height="20" viewBox="0 0 24 24" class="icon-line" stroke-width="1.4"><rect x="3" y="3" width="18" height="18" rx="2.5"/><circle cx="8.5" cy="8.5" r="1.8"/><polyline points="21 15 16 10 5 21"/></svg>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterDef(f,el){
+  curFilter=f;
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  renderDefects();
+}
+
+function toggleStatus(id){
+  const d=defects[curProjId];
+  const item=d.find(x=>x.id===id);
+  if(item){item.status=item.status==='pending'?'done':'pending';renderDefects();updateBadges();}
+}
+
+// ── RENDER PDF ──
+function renderPDF(){
+  const p=projects.find(x=>x.id===curProjId);
+  const d=defects[curProjId]||[];
+  const add=addendum[curProjId]||[];
+  const today=new Date().toLocaleDateString('zh-TW');
+
+  document.getElementById('pdf-footer-date').textContent='產生日期：'+today;
+
+  // Info blocks
+  const infoHtml=`
+    <div class="pdf-info-item"><div class="pdf-info-label">專案名稱</div><div class="pdf-info-value">${p?p.name:'-'}</div></div>
+    <div class="pdf-info-item"><div class="pdf-info-label">業主</div><div class="pdf-info-value">${p?p.client:'-'}</div></div>
+    <div class="pdf-info-item"><div class="pdf-info-label">驗收日期</div><div class="pdf-info-value">${p?p.date:'-'}</div></div>
+    <div class="pdf-info-item"><div class="pdf-info-label">缺失總數</div><div class="pdf-info-value">${d.length} 項（待改善 ${d.filter(x=>x.status==='pending').length}）</div></div>`;
+  document.getElementById('pdf-info-0').innerHTML=infoHtml;
+  document.getElementById('pdf-info-1').innerHTML=`
+    <div class="pdf-info-item"><div class="pdf-info-label">專案名稱</div><div class="pdf-info-value">${p?p.name:'-'}</div></div>
+    <div class="pdf-info-item"><div class="pdf-info-label">業主</div><div class="pdf-info-value">${p?p.client:'-'}</div></div>
+    <div class="pdf-info-item"><div class="pdf-info-label">日期</div><div class="pdf-info-value">${today}</div></div>
+    <div class="pdf-info-item"><div class="pdf-info-label">追加項目數</div><div class="pdf-info-value">${add.length} 項</div></div>`;
+
+  function tableRow(x,i){
+    return `<tr>
+      <td class="col-no">${i+1}</td>
+      <td class="col-check">
+        <div class="check-box ${x.status==='done'?'checked':''}" onclick="this.classList.toggle('checked')">
+          ${x.status==='done'?`<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`:''}
+        </div>
+      </td>
+      <td>${x.content}</td>
+      <td class="col-qty" style="text-align:center">${x.qty||'-'}</td>
+      <td class="col-img"><div class="img-placeholder"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div></td>
+      <td class="col-note" style="font-size:11px;color:#888">${x.note||'-'}</td>
+    </tr>`;
+  }
+
+  document.getElementById('pdf-tbody-0').innerHTML=d.length
+    ? d.map((x,i)=>tableRow(x,i)).join('')
+    : '<tr><td colspan="6" style="text-align:center;padding:24px;color:#aaa;font-size:13px">目前無缺失紀錄</td></tr>';
+
+  document.getElementById('pdf-tbody-1').innerHTML=add.length
+    ? add.map((x,i)=>tableRow(x,i)).join('')
+    : '<tr><td colspan="6" style="text-align:center;padding:24px;color:#aaa;font-size:13px">目前無追加工程項目</td></tr>';
+}
+
+function switchPdfTab(idx,el){
+  document.querySelectorAll('.pdf-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.pdf-page').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('pdf-page-'+idx).classList.add('active');
+}
+
+// ── PANELS ──
+function openOv(name){
+  document.getElementById('ov-'+name).classList.add('open');
+  if(name==='defect'){
+    const d=new Date(); d.setDate(d.getDate()+7);
+    document.getElementById('f-deadline').value=d.toISOString().split('T')[0];
+    document.getElementById('f-content').value='';
+    document.getElementById('f-qty').value='';
+    document.getElementById('f-note').value='';
+    document.getElementById('photo-prev').style.display='none';
+  }
+  if(name==='project'){
+    document.getElementById('p-date').value=new Date().toISOString().split('T')[0];
+    document.getElementById('p-name').value='';
+    document.getElementById('p-client').value='';
+    document.getElementById('p-note').value='';
+  }
+}
+function closeOv(name,e){
+  if(e&&e.target!==e.currentTarget) return;
+  document.getElementById('ov-'+name).classList.remove('open');
+}
+
+function submitDefect(e){
+  e.preventDefault();
+  const content=document.getElementById('f-content').value.trim();
+  if(!content) return;
+  const d=defects[curProjId]=defects[curProjId]||[];
+  const newId=d.length?Math.max(...d.map(x=>x.id))+1:1;
+  d.push({id:newId,content,qty:document.getElementById('f-qty').value,
+    status:document.getElementById('f-status').value,
+    deadline:document.getElementById('f-deadline').value,
+    note:document.getElementById('f-note').value});
+  closeOv('defect');
+  renderDefects();
+  updateBadges();
+  document.getElementById('detail-count').textContent=d.length+' 項缺失';
+}
+
+function submitProject(e){
+  e.preventDefault();
+  const name=document.getElementById('p-name').value.trim();
+  if(!name) return;
+  const newId=Math.max(...projects.map(p=>p.id))+1;
+  projects.push({id:newId,name,
+    client:document.getElementById('p-client').value||'待填寫',
+    date:document.getElementById('p-date').value||new Date().toISOString().split('T')[0],
+    note:document.getElementById('p-note').value,status:'inprogress'});
+  defects[newId]=[];addendum[newId]=[];
+  closeOv('project');
+  renderProjects();
+  updateBadges();
+}
+
+function previewPhoto(input){
+  if(input.files&&input.files[0]){
+    const pr=document.getElementById('photo-prev');
+    pr.style.display='';
+    pr.innerHTML=`<img src="${URL.createObjectURL(input.files[0])}" style="width:100%;border-radius:10px;max-height:180px;object-fit:cover;" alt="預覽">`;
+  }
+}
+
+function updateBadges(){
+  const pending=Object.values(defects).flat().filter(x=>x.status==='pending').length;
+  document.getElementById('badge-defects').textContent=pending;
+  document.getElementById('badge-projects').textContent=projects.length;
+}
+
+// ── THEME ──
+const SUN='<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>';
+const MOON='<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+function toggleTheme(){
+  const html=document.documentElement;
+  const dark=html.getAttribute('data-theme')==='dark';
+  html.setAttribute('data-theme',dark?'light':'dark');
+  const icon=dark?SUN:MOON;
+  ['theme-icon-side','theme-icon-top'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=icon;});
+}
+
+// ── INIT ──
+(function(){
+  if(window.matchMedia('(prefers-color-scheme:dark)').matches){
+    document.documentElement.setAttribute('data-theme','dark');
+    ['theme-icon-side','theme-icon-top'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=MOON;});
+  }
+})();
+</script>
+</body>
+</html>
