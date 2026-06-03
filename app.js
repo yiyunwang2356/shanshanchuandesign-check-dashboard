@@ -46,6 +46,7 @@ const GAS_REMINDER_ENDPOINT='';
 let curProjId=1,curFilter='all',defectQuery='',currentPhoto='',pendingDefectData=null;
 let projectQuery='',projectDesignerFilter='',projectStatusFilter='',defectDesignerFilter='';
 let editingProjectId=null,editingDefectId=null,editingAddendumId=null;
+let pendingDelete=null;
 
 // ── LOGIN ──
 function handleLogin(e){
@@ -155,6 +156,7 @@ function renderProjects(q=projectQuery){
         <div class="prog-label">${done}/${d.length} 完成</div>
         <div class="prog-bar"><div class="prog-fill" style="width:${pct}%"></div></div>
         <button class="mini-action" onclick="event.stopPropagation();openOv('project',${p.id})">編輯</button>
+        <button class="mini-action mini-danger" onclick="event.stopPropagation();requestDelete('project',${p.id})">刪除</button>
       </div>
     </div>`;
   }).join('');
@@ -427,6 +429,7 @@ function renderDefects(){
             期限 ${x.deadline}
           </div>`:''}
           <button class="mini-action" onclick="openOv('defect',${x.id})">編輯</button>
+          <button class="mini-action mini-danger" onclick="requestDelete('defect',${x.id})">刪除</button>
           <button class="mini-action" onclick="toggleStatus(${x.id})">${x.status==='pending'?'標為完成':'改回待改善'}</button>
         </div>
       </div>
@@ -492,7 +495,7 @@ function renderPDF(){
       <td class="col-check">
         <button class="check-box ${x.status==='done'?'checked':''}" onclick="toggleReportCheck('${type}',${x.id},this)" aria-label="切換審核狀態"></button>
       </td>
-      <td>${x.content}<button class="table-edit" onclick="openOv('${type==='addendum'?'addendum':'defect'}',${x.id})">編輯</button></td>
+      <td>${x.content}<button class="table-edit" onclick="openOv('${type==='addendum'?'addendum':'defect'}',${x.id})">編輯</button><button class="table-edit table-delete" onclick="requestDelete('${type}',${x.id})">刪除</button></td>
       <td class="col-qty text-center">${x.qty||'-'}</td>
       <td class="col-img">${x.photo?`<img class="pdf-thumb" src="${x.photo}" alt="現場照片">`:'-'}</td>
       <td class="col-note note-text">${x.note||'-'}</td>
@@ -581,6 +584,77 @@ function openOv(name,id=null){
 function closeOv(name,e){
   if(e&&e.target!==e.currentTarget) return;
   document.getElementById('ov-'+name).classList.remove('open');
+}
+
+function getDeleteMeta(type,id){
+  if(type==='project'){
+    const item=projects.find(p=>p.id===id);
+    return {label:'專案',name:item?.name||'此專案'};
+  }
+  if(type==='addendum'){
+    const item=(addendum[curProjId]||[]).find(x=>x.id===id);
+    return {label:'工程追加項目',name:item?.content||'此追加項目'};
+  }
+  const item=(defects[curProjId]||[]).find(x=>x.id===id);
+  return {label:'缺失項目',name:item?.content||'此缺失'};
+}
+
+function requestDelete(type,id){
+  pendingDelete={type,id};
+  const meta=getDeleteMeta(type,id);
+  document.getElementById('delete-confirm-title').textContent=`確認刪除${meta.label}`;
+  document.getElementById('delete-confirm-desc').textContent=`將刪除「${meta.name}」，刪除後無法復原。`;
+  document.getElementById('delete-confirm').classList.remove('is-hidden');
+}
+
+function closeDeleteConfirm(e){
+  if(e&&e.target!==e.currentTarget) return;
+  pendingDelete=null;
+  document.getElementById('delete-confirm').classList.add('is-hidden');
+}
+
+function confirmDelete(){
+  if(!pendingDelete) return;
+  const {type,id}=pendingDelete;
+  if(type==='project'){
+    const index=projects.findIndex(p=>p.id===id);
+    if(index>-1) projects.splice(index,1);
+    delete defects[id];
+    delete addendum[id];
+    if(curProjId===id) curProjId=projects[0]?.id||0;
+  } else {
+    const source=type==='addendum'?addendum:defects;
+    const list=source[curProjId]||[];
+    const index=list.findIndex(x=>x.id===id);
+    if(index>-1) list.splice(index,1);
+  }
+  closeDeleteConfirm();
+  refreshAfterDelete(type);
+}
+
+function refreshAfterDelete(type){
+  populateSmartFilters();
+  populateProjectSelects();
+  renderDashboard();
+  renderProjects();
+  updateBadges();
+  if(type==='project'){
+    if(!document.getElementById('view-defects').classList.contains('is-hidden')){
+      syncProjectHeader();
+      renderProjectTabs('defect-project-tabs');
+      renderDefects();
+    }
+    if(!document.getElementById('view-pdf').classList.contains('is-hidden')){
+      renderProjectTabs('pdf-project-tabs');
+      renderPDF();
+    }
+    return;
+  }
+  syncProjectHeader();
+  renderProjectTabs('defect-project-tabs');
+  renderDefects();
+  renderProjectTabs('pdf-project-tabs');
+  renderPDF();
 }
 
 function submitDefect(e){

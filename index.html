@@ -533,6 +533,20 @@
   </div>
 </div>
 
+<div class="confirm-overlay is-hidden" id="delete-confirm" onclick="closeDeleteConfirm(event)">
+  <div class="delete-dialog">
+    <div class="delete-dialog-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" class="icon-line" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+    </div>
+    <div class="delete-dialog-title" id="delete-confirm-title">確認刪除</div>
+    <div class="delete-dialog-desc" id="delete-confirm-desc">刪除後將無法復原。</div>
+    <div class="delete-dialog-actions">
+      <button type="button" class="btn btn-secondary" onclick="closeDeleteConfirm()">取消</button>
+      <button type="button" class="btn btn-danger" onclick="confirmDelete()">確認刪除</button>
+    </div>
+  </div>
+</div>
+
 <script src="app.js"></script>
 </body>
 </html>
