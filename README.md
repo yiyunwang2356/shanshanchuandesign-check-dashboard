@@ -56,6 +56,21 @@ NEXT_PUBLIC_FIREBASE_APP_ID=
 
 目前 App 在未填 Firebase 設定時會使用前端暫存資料，方便先確認操作流程。後續可把專案、缺失與照片改接 Firestore / Cloud Storage。
 
+## Google Apps Script 提醒
+
+靜態版已先準備提醒 payload。缺失或追加工程儲存時，系統會整理以下資料：
+
+- 專案名稱
+- 工程內容
+- 負責人
+- Email
+- 截止日期
+- 提醒日期（截止日前一天）
+
+後續將 Apps Script 部署成 Web App 後，把網址填入 `app.js` 的 `GAS_REMINDER_ENDPOINT` 即可開始串接。
+
+Apps Script 端可用 `e.postData.contents` 讀取 JSON 字串，再依 `remindAt` 建立排程或寫入 Google Sheet。
+
 ## 部署方向
 
 1. 在客戶 Firebase 帳號建立專案。
