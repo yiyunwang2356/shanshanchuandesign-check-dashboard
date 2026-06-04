@@ -1,15 +1,15 @@
 // ── DATA ──
 const projects=[
-  {id:1,name:'信義區住宅改造',client:'陳先生',date:'2025-06-01',designer:'王設計師',email:'designer.wang@shanchuan.com',note:'3F/4F 複合式住宅',status:'inprogress'},
-  {id:2,name:'大安區辦公室設計',client:'科技新創有限公司',date:'2025-05-20',designer:'林設計師',email:'designer.lin@shanchuan.com',note:'整層辦公室翻修',status:'inprogress'},
-  {id:3,name:'內湖透天厝新建',client:'林太太',date:'2025-04-15',designer:'陳設計師',email:'designer.chen@shanchuan.com',note:'B1~4F 全棟',status:'done'},
+  {id:1,name:'信義區住宅改造',client:'陳先生',date:'2025-06-01',designer:'王設計師',email:'designer.wang@gmail.com',note:'3F/4F 複合式住宅',status:'inprogress'},
+  {id:2,name:'大安區辦公室設計',client:'科技新創有限公司',date:'2025-05-20',designer:'林設計師',email:'designer.lin@gmail.com',note:'整層辦公室翻修',status:'inprogress'},
+  {id:3,name:'內湖透天厝新建',client:'林太太',date:'2025-04-15',designer:'陳設計師',email:'designer.chen@gmail.com',note:'B1~4F 全棟',status:'done'},
 ];
 const people=[
-  {name:'王設計師',email:'designer.wang@shanchuan.com'},
-  {name:'林設計師',email:'designer.lin@shanchuan.com'},
-  {name:'陳設計師',email:'designer.chen@shanchuan.com'},
-  {name:'李設計師',email:'designer.li@shanchuan.com'},
-  {name:'張設計師',email:'designer.chang@shanchuan.com'},
+  {name:'王設計師',email:'designer.wang@gmail.com'},
+  {name:'林設計師',email:'designer.lin@gmail.com'},
+  {name:'陳設計師',email:'designer.chen@gmail.com'},
+  {name:'李設計師',email:'designer.li@gmail.com'},
+  {name:'張設計師',email:'designer.chang@gmail.com'},
 ];
 const trades=['油漆','泥作','水電','木工','系統櫃','玻璃','鐵件','清潔','其他'];
 const defects={

@@ -85,13 +85,15 @@ NEXT_PUBLIC_FIREBASE_APP_ID=
 - 專案名稱
 - 工程內容
 - 負責人
-- Email
+- 設計師 Google 信箱
 - 截止日期
 - 提醒日期（截止日前一天）
 
 後續將 Apps Script 部署成 Web App 後，把網址填入 `public/prototype/app.js` 的 `GAS_REMINDER_ENDPOINT` 即可開始串接。
 
 Apps Script 端可用 `e.postData.contents` 讀取 JSON 字串，再依 `remindAt` 建立排程或寫入 Google Sheet。
+
+登入帳號預計使用 GoDaddy 公司網域信箱；專案負責設計師的提醒信箱使用 Google / Gmail 信箱。
 
 ## 部署方向
 
