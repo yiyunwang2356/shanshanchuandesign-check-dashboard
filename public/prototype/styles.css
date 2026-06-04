@@ -176,7 +176,7 @@ button,:where([role="button"]){transition:opacity var(--t),background var(--t),c
 .stat-icon-wrap{width:36px;height:36px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center}
 .stat-value{font-size:1.875rem;font-weight:700;letter-spacing:-0.04em;line-height:1}
 .stat-label{font-size:0.75rem;color:var(--text-2);font-weight:500;letter-spacing:0.01em}
-.dashboard-visuals{display:grid;grid-template-columns:1.25fr 0.75fr;gap:var(--s4);margin-bottom:var(--s4)}
+.dashboard-visuals{display:grid;grid-template-columns:1.2fr 0.8fr;gap:var(--s4);margin-bottom:var(--s4)}
 .visual-card{background:var(--surface);border-radius:var(--r-lg);padding:var(--s5);box-shadow:var(--shadow-xs);display:flex;flex-direction:column;gap:var(--s4);min-height:164px;position:relative;overflow:hidden}
 .visual-card-wide{display:grid;grid-template-columns:1fr auto;align-items:center}
 .visual-caption{font-size:0.75rem;color:var(--text-2);margin-top:4px}
