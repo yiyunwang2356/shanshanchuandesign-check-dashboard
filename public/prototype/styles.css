@@ -563,6 +563,7 @@ button,:where([role="button"]){transition:opacity var(--t),background var(--t),c
   .search-wrap input{width:130px}
   .smart-filters .search-wrap input,.filters .search-wrap input{width:100%}
   .filters{flex-wrap:wrap}
+  .filters .chip{padding:6px 12px}
 }
 
 /* ── LINE ICONS: fine-stroke style ── */
