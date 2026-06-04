@@ -170,6 +170,7 @@ function renderDashboard(){
   document.getElementById('stat-active-projects').textContent=active;
   document.getElementById('stat-pending-defects').textContent=pending;
   document.getElementById('stat-done-defects').textContent=done;
+  renderDashboardVisuals(allDefects,done,pending);
 
   const recent=projects.flatMap(p=>(defects[p.id]||[])
     .filter(x=>x.status==='pending')
@@ -191,6 +192,38 @@ function renderDashboard(){
     .map(x=>({project:p.name,date:x.deadline,title:x.content})))
     .sort((a,b)=>new Date(a.date)-new Date(b.date))
   renderCalendar(events);
+}
+
+function renderDashboardVisuals(allDefects,done,pending){
+  const total=allDefects.length;
+  const rate=total?Math.round(done/total*100):0;
+  const ring=document.getElementById('completion-ring');
+  if(ring) ring.style.setProperty('--pct',rate);
+  const rateEl=document.getElementById('completion-rate');
+  if(rateEl) rateEl.textContent=rate+'%';
+  const meta=document.getElementById('completion-meta');
+  if(meta){
+    meta.innerHTML=`
+      <div><strong>${total}</strong><span>全部項目</span></div>
+      <div><strong>${pending}</strong><span>待改善</span></div>
+      <div><strong>${done}</strong><span>已完成</span></div>
+    `;
+  }
+  const pendingByTrade=trades.map(trade=>({
+    trade,
+    count:allDefects.filter(x=>x.status==='pending'&&(x.trade||'其他')===trade).length
+  })).filter(x=>x.count>0).slice(0,5);
+  const max=Math.max(1,...pendingByTrade.map(x=>x.count));
+  const bars=document.getElementById('trade-bars');
+  if(bars){
+    bars.innerHTML=pendingByTrade.length?pendingByTrade.map(x=>`
+      <div class="trade-bar-row">
+        <span>${x.trade}</span>
+        <div class="trade-bar-track"><div style="width:${Math.max(10,Math.round(x.count/max*100))}%"></div></div>
+        <strong>${x.count}</strong>
+      </div>
+    `).join(''):'<div class="empty-inline">目前沒有待改善工種</div>';
+  }
 }
 
 function renderCalendar(events){
