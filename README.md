@@ -17,8 +17,7 @@
 ## 技術架構
 
 - Frontend：Next.js App Router
-- UI：React + TypeScript + CSS
-- Icons：lucide-react
+- UI：Next.js 承載最新版 HTML / CSS / JavaScript 原型
 - Backend-ready：Firebase Authentication、Firestore、Cloud Storage
 - Hosting：Firebase Hosting，可接 GoDaddy 自訂網域，例如 `app.xxx.com`
 
@@ -26,17 +25,24 @@
 
 ```text
 .
-├── index.html          # 目前可直接開啟預覽的靜態 MVP 原型
-├── styles.css          # 靜態原型樣式
-├── app.js              # 靜態原型互動邏輯
-├── app/                # Next.js App Router 頁面
+├── app/                # Next.js App Router 入口
+│   ├── layout.tsx      # 全站 metadata 與 layout
+│   ├── page.tsx        # 載入最新版驗收系統原型
+│   └── globals.css     # Next 外框樣式
+├── public/prototype/   # 目前最新版驗收系統 UI
+│   ├── index.html      # 系統畫面
+│   ├── styles.css      # 系統樣式
+│   └── app.js          # 系統互動邏輯
 ├── lib/                # Firebase 與資料型別設定
+├── index.html          # file:// 預覽轉向頁
 ├── .env.example        # Firebase 環境變數範本
 ├── package.json        # 專案套件與啟動指令
 └── README.md           # 專案說明
 ```
 
 `.next`、`node_modules`、`.DS_Store` 等本機產物已列入 `.gitignore`，不需要上傳到 GitHub。
+
+目前正式 Next.js 首頁會載入 `public/prototype/index.html`。根目錄的 `index.html` 只是為了保留本機 `file://` 預覽路徑，會自動轉向同一份 prototype。
 
 ## 開發啟動
 
@@ -83,7 +89,7 @@ NEXT_PUBLIC_FIREBASE_APP_ID=
 - 截止日期
 - 提醒日期（截止日前一天）
 
-後續將 Apps Script 部署成 Web App 後，把網址填入 `app.js` 的 `GAS_REMINDER_ENDPOINT` 即可開始串接。
+後續將 Apps Script 部署成 Web App 後，把網址填入 `public/prototype/app.js` 的 `GAS_REMINDER_ENDPOINT` 即可開始串接。
 
 Apps Script 端可用 `e.postData.contents` 讀取 JSON 字串，再依 `remindAt` 建立排程或寫入 Google Sheet。
 
