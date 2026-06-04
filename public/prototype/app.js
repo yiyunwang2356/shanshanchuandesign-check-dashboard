@@ -23,7 +23,7 @@ const defects={
   2:[
     {id:1,trade:'水電',content:'會議室天花板燈具安裝偏位',qty:'4 盞',status:'pending',deadline:'2025-06-15',note:''},
     {id:2,trade:'泥作',content:'接待區地板大理石紋路未對齊',qty:'6 m²',status:'pending',deadline:'2025-06-20',note:'重新排列'},
-    {id:3,trade:'水電',content:'茶水間排水管漏水',qty:'1 處',status:'pending',deadline:'2025-06-09',note:'緊急處理'},
+    {id:3,trade:'水電',content:'茶水間排水管漏水',qty:'1 處',status:'pending',deadline:'2025-06-09',note:'需優先安排'},
   ],
   3:[
     {id:1,trade:'油漆',content:'外牆塗料顏色與設計稿不符',qty:'全棟',status:'done',deadline:'2025-04-20',note:'已重新噴漆'},
@@ -44,7 +44,7 @@ const addendum={
 
 const GAS_REMINDER_ENDPOINT='';
 let curProjId=1,curFilter='all',defectQuery='',currentPhoto='',pendingDefectData=null;
-let projectQuery='',projectDesignerFilter='',projectStatusFilter='',defectDesignerFilter='';
+let projectQuery='',projectDesignerFilter='',projectStatusFilter='',defectDesignerFilter='',calendarProjectFilter='';
 let editingProjectId=null,editingDefectId=null,editingAddendumId=null;
 let pendingDelete=null;
 
@@ -101,12 +101,18 @@ function showView(name){
     populateSmartFilters();
     syncProjectHeader();
     renderProjectTabs('defect-project-tabs');
+    renderProjectSchedule();
     renderDefects();
   }
   if(name==='pdf'){
     renderProjectTabs('pdf-project-tabs');
     renderPDF();
   }
+}
+
+function scrollContentTop(){
+  const content=document.querySelector('.content');
+  if(content) content.scrollTo({top:0,behavior:'smooth'});
 }
 
 function handleTopAction(){
@@ -173,25 +179,46 @@ function renderDashboard(){
   renderDashboardVisuals(allDefects,done,pending);
 
   const recent=projects.flatMap(p=>(defects[p.id]||[])
-    .filter(x=>x.status==='pending')
-    .map(x=>({...x,project:p.name,designer:p.designer||'未指定'})))
+    .filter(x=>isDueSoonDefect(x))
+    .map(x=>({...x,projectId:p.id,project:p.name,designer:p.designer||'未指定'})))
     .sort((a,b)=>new Date(a.deadline||'2999-12-31')-new Date(b.deadline||'2999-12-31'))
     .slice(0,5);
   document.getElementById('overview-list').innerHTML=recent.length?recent.map(x=>`
-    <div class="overview-item">
+    <button class="overview-item due-soon-item" onclick="openDueSoonDefect(${x.projectId},${x.id})">
       <div>
-        <strong>${x.content}</strong>
+        <strong>即將到期｜${x.content}</strong>
         <span>${x.project} · ${x.designer} · ${x.trade||'其他'}</span>
       </div>
       <small>${x.deadline?`期限 ${x.deadline}`:'未設期限'}</small>
-    </div>
-  `).join(''):'<div class="empty-inline">目前沒有待改善缺失</div>';
+    </button>
+  `).join(''):'<div class="empty-inline">目前沒有即將到期事件</div>';
 
-  const events=projects.flatMap(p=>(defects[p.id]||[])
+  populateCalendarProjectFilter();
+  const events=projects
+    .filter(p=>!calendarProjectFilter||String(p.id)===calendarProjectFilter)
+    .flatMap(p=>(defects[p.id]||[])
     .filter(x=>x.status==='pending'&&x.deadline)
-    .map(x=>({project:p.name,date:x.deadline,title:x.content})))
+    .map(x=>({projectId:p.id,project:p.name,date:x.deadline,title:x.content})))
     .sort((a,b)=>new Date(a.date)-new Date(b.date))
   renderCalendar(events);
+}
+
+function isDueSoonDefect(item){
+  if(!item||item.status!=='pending') return false;
+  if(!item.deadline) return false;
+  const today=new Date();
+  const deadline=new Date(item.deadline);
+  return (deadline-today)/86400000<3;
+}
+
+function openDueSoonDefect(projectId,defectId){
+  curProjId=projectId;
+  showView('defects');
+  setDefectFilter('dueSoon');
+  setTimeout(()=>{
+    const card=document.querySelector(`[data-defect-id="${defectId}"]`);
+    if(card) card.scrollIntoView({behavior:'smooth',block:'center'});
+  },0);
 }
 
 function renderDashboardVisuals(allDefects,done,pending){
@@ -252,12 +279,52 @@ function renderCalendar(events){
 }
 
 function selectCalendarDate(date){
-  const events=projects.flatMap(p=>(defects[p.id]||[])
+  const events=projects
+    .filter(p=>!calendarProjectFilter||String(p.id)===calendarProjectFilter)
+    .flatMap(p=>(defects[p.id]||[])
     .filter(x=>x.status==='pending'&&x.deadline===date)
     .map(x=>({project:p.name,title:x.content,trade:x.trade||'其他'})));
   document.getElementById('calendar-detail').innerHTML=events.length
     ? `<strong>${date}</strong>${events.map(e=>`<div>${e.project}｜${e.trade}｜${e.title}</div>`).join('')}`
     : `<strong>${date}</strong><div>當天沒有待辦缺失</div>`;
+}
+
+function populateCalendarProjectFilter(){
+  const select=document.getElementById('calendar-project-filter');
+  if(!select) return;
+  select.innerHTML='<option value="">全部專案</option>'+projects.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
+  select.value=calendarProjectFilter;
+}
+
+function filterCalendarProject(v){
+  calendarProjectFilter=v;
+  renderDashboard();
+}
+
+function handleStatCard(type){
+  document.querySelectorAll('.stat-card').forEach(card=>card.classList.remove('active'));
+  const activeCard=document.querySelector(`[data-stat-card="${type}"]`);
+  if(activeCard) activeCard.classList.add('active');
+  if(type==='active'){
+    projectStatusFilter='inprogress';
+    const status=document.getElementById('project-status-filter');
+    if(status) status.value='inprogress';
+    renderProjects();
+    document.getElementById('project-list').scrollIntoView({behavior:'smooth',block:'start'});
+    return;
+  }
+  if(type==='done'){
+    projectStatusFilter='done';
+    const status=document.getElementById('project-status-filter');
+    if(status) status.value='done';
+    renderProjects();
+    document.getElementById('project-list').scrollIntoView({behavior:'smooth',block:'start'});
+    return;
+  }
+  if(type==='pending'){
+    showView('defects');
+    setDefectFilter('pending');
+  }
 }
 
 function filterProjects(v){renderProjects(v)}
@@ -309,7 +376,9 @@ function selectProjectFromFilter(v){
   if(designerSelect) designerSelect.value='';
   renderProjectTabs('defect-project-tabs');
   syncProjectHeader();
+  renderProjectSchedule();
   renderDefects();
+  scrollContentTop();
 }
 
 function filterDefectsDesigner(v){
@@ -327,13 +396,16 @@ function filterDefectsDesigner(v){
     if(projectSelect) projectSelect.value=String(project.id);
     renderProjectTabs('defect-project-tabs');
     syncProjectHeader();
+    renderProjectSchedule();
   }
   renderDefects();
+  scrollContentTop();
 }
 
 function openProject(id){
   curProjId=id;
   showView('defects');
+  scrollContentTop();
 }
 
 function selectProject(id,view='defects'){
@@ -350,7 +422,9 @@ function selectProject(id,view='defects'){
   const projectSelect=document.getElementById('defect-project-filter');
   if(projectSelect) projectSelect.value=String(curProjId);
   renderProjectTabs('defect-project-tabs');
+  renderProjectSchedule();
   renderDefects();
+  scrollContentTop();
 }
 
 function syncProjectHeader(){
@@ -361,6 +435,30 @@ function syncProjectHeader(){
   document.getElementById('detail-client').textContent=`${p.client} · ${p.designer||'未指定設計師'}`;
   document.getElementById('detail-date').textContent=p.date;
   document.getElementById('detail-count').textContent=d.length+' 項缺失';
+}
+
+function renderProjectSchedule(){
+  const list=defects[curProjId]||[];
+  const total=list.length;
+  const done=list.filter(x=>x.status==='done').length;
+  const rate=total?Math.round(done/total*100):0;
+  const rateEl=document.getElementById('project-schedule-rate');
+  const progress=document.getElementById('project-schedule-progress');
+  const timeline=document.getElementById('project-schedule-timeline');
+  if(rateEl) rateEl.textContent=rate+'%';
+  if(progress) progress.style.width=rate+'%';
+  if(!timeline) return;
+  const items=list
+    .filter(x=>x.status==='pending'&&x.deadline)
+    .sort((a,b)=>new Date(a.deadline)-new Date(b.deadline))
+    .slice(0,5);
+  timeline.innerHTML=items.length?items.map(x=>`
+    <button class="schedule-item" onclick="setDefectFilter('all');setTimeout(()=>{const card=document.querySelector('[data-defect-id=${x.id}]');if(card)card.scrollIntoView({behavior:'smooth',block:'center'});},0)">
+      <span>${x.deadline}</span>
+      <strong>${x.trade||'其他'}</strong>
+      <em>${x.content}</em>
+    </button>
+  `).join(''):'<div class="empty-inline">目前沒有待安排的收尾期限</div>';
 }
 
 function renderProjectTabs(targetId){
@@ -431,23 +529,24 @@ function queueReminder(type,item,project){
 
 // ── RENDER DEFECTS ──
 function renderDefects(){
+  renderProjectSchedule();
   const list=document.getElementById('defect-list');
   const d=defects[curProjId]||[];
   const p=projects.find(x=>x.id===curProjId);
   const q=defectQuery.trim();
   const filtered=d
-    .filter(x=>curFilter==='all'||x.status===curFilter)
+    .filter(x=>curFilter==='all'||(curFilter==='dueSoon'?isDueSoonDefect(x):x.status===curFilter))
     .filter(x=>!q||`${x.trade||''} ${x.content} ${x.qty||''} ${x.note||''} ${p?.designer||''}`.includes(q))
-    .sort((a,b)=>new Date(b.deadline||0)-new Date(a.deadline||0));
+    .sort((a,b)=>{
+      if(a.status!==b.status) return a.status==='pending'?-1:1;
+      return new Date(a.deadline||'2999-12-31')-new Date(b.deadline||'2999-12-31');
+    });
   if(!filtered.length){
     list.innerHTML=`<div class="empty"><div class="empty-icon"><svg width="40" height="40" viewBox="0 0 24 24" class="icon-line" stroke-width="1.2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div><div class="empty-title">目前沒有缺失</div><div class="empty-desc">點擊「新增缺失」開始紀錄</div></div>`;
     return;
   }
-  const today=new Date();
   list.innerHTML=filtered.map(x=>{
-    const dl=x.deadline?new Date(x.deadline):null;
-    const urgent=dl&&x.status==='pending'&&(dl-today)/(86400000)<3;
-    return `<div class="defect-card ${x.status}">
+    return `<div class="defect-card ${x.status}" data-defect-id="${x.id}">
       <div>
         <div class="defect-no">缺失 #${String(x.id).padStart(3,'0')}</div>
         <div class="defect-title">${x.content}</div>
@@ -457,7 +556,7 @@ function renderDefects(){
         ${x.note?`<div class="defect-note-text">${x.note}</div>`:''}
         <div class="defect-footer-row">
           <span class="tag ${x.status==='pending'?'tag-pending':'tag-done'}">${x.status==='pending'?'待改善':'已完成'}</span>
-          ${x.deadline?`<div class="deadline-text ${urgent?'urgent':''}">
+          ${x.deadline?`<div class="deadline-text">
             <svg width="11" height="11" viewBox="0 0 24 24" class="icon-line" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             期限 ${x.deadline}
           </div>`:''}
@@ -479,9 +578,15 @@ function filterDefectsText(v){
 }
 
 function filterDef(f,el){
+  setDefectFilter(f,el);
+}
+
+function setDefectFilter(f,el=null){
   curFilter=f;
   document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
-  el.classList.add('active');
+  const label={dueSoon:'即將到期',pending:'待改善',done:'已完成',all:'全部'}[f]||'全部';
+  const target=el||[...document.querySelectorAll('.chip')].find(c=>c.textContent.trim()===label);
+  if(target) target.classList.add('active');
   renderDefects();
 }
 

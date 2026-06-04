@@ -171,7 +171,11 @@ button,:where([role="button"]){transition:opacity var(--t),background var(--t),c
 
 /* ============================================================  STATS  */
 .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s4);margin-bottom:var(--s4)}
-.stat-card{background:var(--surface);border-radius:var(--r-lg);padding:var(--s4);box-shadow:var(--shadow-xs);display:flex;flex-direction:column;gap:var(--s1);position:relative;overflow:hidden}
+.stat-card{background:var(--surface);border:1.5px solid transparent;border-radius:var(--r-lg);padding:var(--s4);box-shadow:var(--shadow-xs);display:flex;flex-direction:column;gap:var(--s1);position:relative;overflow:hidden}
+.stat-card[role="button"]{cursor:pointer;transition:transform var(--t),box-shadow var(--t),border-color var(--t)}
+.stat-card[role="button"]:hover{transform:translateY(-1px);box-shadow:var(--shadow-md)}
+.stat-card[role="button"]:focus-visible{outline:3px solid rgba(5,51,75,0.14);outline-offset:2px}
+.stat-card.active{box-shadow:var(--shadow-sm);border-color:rgba(5,51,75,0.18);background:var(--brand-paler)}
 .stat-icon-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--s2);position:relative;z-index:1}
 .stat-icon-wrap{width:36px;height:36px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center}
 .stat-value{font-size:1.875rem;font-weight:700;letter-spacing:-0.04em;line-height:1}
@@ -197,9 +201,13 @@ button,:where([role="button"]){transition:opacity var(--t),background var(--t),c
 .trade-bar-track div{height:100%;border-radius:999px;background:var(--brand)}
 .overview-grid{display:grid;grid-template-columns:1.2fr 0.8fr;gap:var(--s4);margin-bottom:var(--s6)}
 .overview-panel{background:var(--surface);border-radius:var(--r-lg);padding:var(--s4);box-shadow:var(--shadow-xs)}
+.panel-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--s3)}
+.calendar-select{min-width:128px;min-height:32px;font-size:0.75rem}
 .overview-list{display:flex;flex-direction:column;gap:8px;margin-top:var(--s3)}
 .calendar-list{margin-top:var(--s3)}
 .overview-item{display:grid;grid-template-columns:1fr auto;gap:var(--s3);align-items:center;padding:10px 0;border-top:1px solid var(--divider)}
+.due-soon-item{width:100%;text-align:left;background:transparent;color:inherit;border:0;cursor:pointer}
+.due-soon-item:hover strong{color:var(--brand)}
 .overview-item:first-child{border-top:0}
 .overview-item strong{display:block;font-size:0.875rem}
 .overview-item span{display:block;color:var(--text-2);font-size:0.75rem;margin-top:2px}
@@ -311,7 +319,16 @@ button,:where([role="button"]){transition:opacity var(--t),background var(--t),c
 }
 .defect-photo-thumb img{width:100%;height:100%;object-fit:cover}
 .deadline-text{font-size:11px;color:var(--text-3);display:flex;align-items:center;gap:4px}
-.deadline-text.urgent{color:var(--red)}
+.project-schedule-card{background:var(--surface);border-radius:var(--r-lg);padding:var(--s4);box-shadow:var(--shadow-xs);margin-bottom:var(--s4)}
+.schedule-rate{font-size:1.125rem;font-weight:700;color:var(--brand);letter-spacing:-0.03em}
+.schedule-progress{height:7px;background:var(--brand-paler);border-radius:999px;overflow:hidden;margin:var(--s4) 0}
+.schedule-progress div{height:100%;background:var(--brand);border-radius:999px;transition:width 0.35s ease}
+.schedule-timeline{display:grid;gap:8px}
+.schedule-item{display:grid;grid-template-columns:86px 52px 1fr;gap:10px;align-items:center;width:100%;text-align:left;background:var(--surface-2);border:1px solid var(--divider);border-radius:var(--r-sm);padding:9px 10px;color:var(--text-2)}
+.schedule-item:hover{border-color:var(--brand);background:var(--brand-paler)}
+.schedule-item span{font-size:0.75rem;color:var(--brand);font-weight:700}
+.schedule-item strong{font-size:0.75rem;color:var(--text-1)}
+.schedule-item em{font-style:normal;font-size:0.8125rem;color:var(--text-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* ============================================================  PANEL (bottom sheet)  */
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.38);backdrop-filter:blur(6px);z-index:100;align-items:flex-end;justify-content:center}
@@ -510,12 +527,16 @@ button,:where([role="button"]){transition:opacity var(--t),background var(--t),c
   .visual-card-wide{grid-template-columns:1fr}
   .completion-visual{justify-content:space-between}
   .overview-grid{grid-template-columns:1fr}
+  .panel-title-row{flex-direction:column}
+  .calendar-select{width:100%}
   .section-hd{align-items:flex-start;gap:var(--s3);flex-direction:column}
   .smart-filters{width:100%;justify-content:flex-start}
   .smart-filters .search-wrap,.filters .search-wrap{flex:1 1 100%}
   .filter-select{flex:1 1 auto;min-width:145px}
   .detail-hd{flex-direction:column}
   .detail-actions{width:100%}
+  .schedule-item{grid-template-columns:1fr;gap:4px}
+  .schedule-item em{white-space:normal}
   .form-row-2{grid-template-columns:1fr}
   .pdf-page{width:100%;min-height:auto;padding:var(--s6) var(--s4)}
   .pdf-report-meta .pdf-info-grid{grid-template-columns:1fr}
