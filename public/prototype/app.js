@@ -43,15 +43,7 @@ const addendum={
 };
 
 const GAS_REMINDER_ENDPOINT='';
-const firebaseConfig={
-  apiKey:'AIzaSyCwJfUGn7VtzwSpsggEISdtQ06OEsUYVYI',
-  authDomain:'shanshanchuan-check-dashboard.firebaseapp.com',
-  projectId:'shanshanchuan-check-dashboard',
-  storageBucket:'shanshanchuan-check-dashboard.firebasestorage.app',
-  messagingSenderId:'336059215991',
-  appId:'1:336059215991:web:3ff38b0416c971fba79672',
-  measurementId:'G-NMMEBQ5ZP7'
-};
+const firebaseConfig=window.SHANCHUAN_FIREBASE_CONFIG||null;
 let firebaseAuth=null,firebaseDb=null,firebaseStorage=null;
 let curProjId=1,curFilter='all',defectQuery='',currentPhoto='',currentPhotoFile=null,pendingDefectData=null;
 let projectQuery='',projectDesignerFilter='',projectStatusFilter='',defectDesignerFilter='',calendarProjectFilter='';
@@ -62,6 +54,7 @@ let pendingDelete=null;
 function initFirebaseServices(){
   if(firebaseAuth&&firebaseDb&&firebaseStorage) return {auth:firebaseAuth,db:firebaseDb,storage:firebaseStorage};
   if(!window.firebase) return null;
+  if(!firebaseConfig?.apiKey) throw new Error('Firebase 設定尚未載入，請建立 public/prototype/firebase-config.js');
   const app=window.firebase.apps?.length?window.firebase.app():window.firebase.initializeApp(firebaseConfig);
   firebaseAuth=window.firebase.auth(app);
   firebaseDb=window.firebase.firestore(app);

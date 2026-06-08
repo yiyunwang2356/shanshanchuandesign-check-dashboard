@@ -9,3 +9,4 @@ dist
 firebase-debug.log
 firestore-debug.log
 storage-debug.log
+public/prototype/firebase-config.js

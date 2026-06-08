@@ -88,6 +88,20 @@ Firebase Console 需先完成：
 2. 到 `Authentication > Users` 新增使用者：`service@shanchuandesign.com`。
 3. 使用 Firebase 後台設定的密碼登入系統。
 
+## Firebase 前端設定檔
+
+GitHub 會把 Google / Firebase Web API Key 判定為 secret，所以正式設定不要直接寫在 `app.js`。
+
+本機測試時請複製範本：
+
+```bash
+cp public/prototype/firebase-config.example.js public/prototype/firebase-config.js
+```
+
+再把 `public/prototype/firebase-config.js` 內的欄位換成 Firebase Console 提供的 Web App config。這個檔案已被 `.gitignore` 忽略，不要 commit。
+
+部署到正式網域時，也需要在部署環境提供同名檔案 `public/prototype/firebase-config.js`，否則登入會提示 Firebase 設定尚未載入。
+
 ## Firestore / Storage 同步
 
 目前資料結構：
