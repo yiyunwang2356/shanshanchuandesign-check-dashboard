@@ -177,6 +177,7 @@ button,:where([role="button"]){transition:opacity var(--t),background var(--t),c
 .topbar-logo{display:none;height:26px;width:auto;max-width:118px;object-fit:contain;object-position:left center}
 .topbar-title{font-size:1.0625rem;font-weight:700;letter-spacing:-0.02em}
 .topbar-actions{display:flex;align-items:center;gap:var(--s2)}
+.mobile-logout-btn{display:none}
 .content{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:var(--s8)}
 
 /* ============================================================  STATS  */
@@ -556,6 +557,11 @@ button,:where([role="button"]){transition:opacity var(--t),background var(--t),c
   .topbar-title{font-size:0.9375rem;position:relative;z-index:1;max-width:34vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .topbar-actions{position:relative;z-index:1}
   .topbar-actions .btn{padding:8px 11px;font-size:0.8125rem}
+  .mobile-logout-btn{
+    width:34px;height:34px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;
+    background:var(--surface);border:1.5px solid var(--border);color:var(--text-2);box-shadow:var(--shadow-xs)
+  }
+  .mobile-logout-btn:hover{color:var(--red);background:var(--red-bg)}
   .mobile-nav{display:block}
   .content{padding:var(--s5) var(--s4);padding-bottom:90px}
   .stats-grid{grid-template-columns:repeat(3,1fr);gap:10px}
