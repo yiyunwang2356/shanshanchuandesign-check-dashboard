@@ -98,9 +98,9 @@ function normalizeMember(doc){
   const data=doc.data();
   return {
     id:doc.id,
-    name:data.name||'',
-    email:data.email||'',
-    role:data.role||'designer',
+    name:String(data.name||'').trim(),
+    email:String(data.email||'').trim(),
+    role:String(data.role||'member').trim().toLowerCase(),
     active:data.active!==false
   };
 }
@@ -167,9 +167,9 @@ async function loadMembersData(){
   if(snapshot.empty) return;
   const members=snapshot.docs
     .map(normalizeMember)
-    .filter(member=>member.active&&member.name&&member.email)
-    .filter(member=>!member.role||member.role==='designer');
+    .filter(member=>member.active&&member.name&&member.email);
   if(!members.length) return;
+  console.info('Loaded members from Firestore',members);
   people.splice(0,people.length,...members.map(({name,email,role})=>({name,email,role})));
 }
 
@@ -750,7 +750,7 @@ function populateTradeSelects(){
 function fillAssigneeEmail(nameInputId,emailInputId){
   const name=document.getElementById(nameInputId).value.trim();
   const emailInput=document.getElementById(emailInputId);
-  const person=people.find(p=>p.name===name);
+  const person=people.find(p=>p.name.trim().toLowerCase()===name.toLowerCase());
   emailInput.value=person?person.email:'';
 }
 
