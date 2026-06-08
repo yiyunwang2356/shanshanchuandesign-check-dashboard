@@ -105,6 +105,20 @@ function docData(data){
   return {...data,updatedAt:new Date().toISOString()};
 }
 
+function getCloudErrorMessage(error){
+  const code=error?.code||'';
+  if(code.includes('permission-denied')) return 'Firebase 規則目前不允許寫入，請確認 Firestore Rules 是否允許已登入使用者讀寫。';
+  if(code.includes('not-found')) return '找不到 Firestore Database，請確認 Cloud Firestore 已建立完成，而且目前看的 Firebase 專案是 shanshanchuan-check-dashboard。';
+  if(code.includes('unavailable')) return 'Firebase 連線暫時失敗，請確認網路後再試一次。';
+  if(code.includes('unauthenticated')) return '目前尚未完成登入，請重新登入後再儲存。';
+  return error?.message||'Firebase 寫入失敗，請稍後再試。';
+}
+
+function showCloudError(error){
+  console.error('Firebase sync failed',error);
+  alert(getCloudErrorMessage(error));
+}
+
 async function loadFirebaseData(){
   if(!firebaseDb) return;
   const snapshot=await firebaseDb.collection('projects').get();
@@ -773,7 +787,11 @@ async function toggleStatus(id){
   const item=d.find(x=>x.id===id);
   if(item){
     item.status=item.status==='pending'?'done':'pending';
-    await saveDefectCloud(curProjId,item);
+    try{
+      await saveDefectCloud(curProjId,item);
+    }catch(error){
+      showCloudError(error);
+    }
     renderDefects();
     renderProjectTabs('defect-project-tabs');
     renderDashboard();
@@ -842,8 +860,12 @@ async function toggleReportCheck(type,id,button){
   const item=(source[curProjId]||[]).find(x=>x.id===id);
   if(item){
     item.status=item.status==='done'?'pending':'done';
-    if(type==='addendum') await saveAddendumCloud(curProjId,item);
-    else await saveDefectCloud(curProjId,item);
+    try{
+      if(type==='addendum') await saveAddendumCloud(curProjId,item);
+      else await saveDefectCloud(curProjId,item);
+    }catch(error){
+      showCloudError(error);
+    }
     button.classList.toggle('checked');
     updateBadges();
   }
@@ -951,7 +973,11 @@ async function confirmDelete(){
     const index=list.findIndex(x=>x.id===id);
     if(index>-1) list.splice(index,1);
   }
-  await deleteCloudRecord(type,id,projectId);
+  try{
+    await deleteCloudRecord(type,id,projectId);
+  }catch(error){
+    showCloudError(error);
+  }
   closeDeleteConfirm();
   refreshAfterDelete(type);
 }
@@ -1010,11 +1036,22 @@ async function saveDefectData(data){
   const d=defects[projectId]=defects[projectId]||[];
   const existing=editingDefectId?d.find(x=>x.id===editingDefectId):null;
   const newId=existing?.id||(d.length?Math.max(...d.map(x=>x.id))+1:1);
-  const cloudPhoto=currentPhotoFile?await uploadDefectPhoto(projectId,newId,currentPhotoFile):photo;
+  let cloudPhoto=photo;
+  try{
+    cloudPhoto=currentPhotoFile?await uploadDefectPhoto(projectId,newId,currentPhotoFile):photo;
+  }catch(error){
+    showCloudError(error);
+    return;
+  }
   const item={id:newId,content,trade,qty,status,deadline,photo:cloudPhoto,note};
   if(existing) Object.assign(existing,item);
   else d.push(item);
-  await saveDefectCloud(projectId,item);
+  try{
+    await saveDefectCloud(projectId,item);
+  }catch(error){
+    showCloudError(error);
+    return;
+  }
   if(project) queueReminder('defect',item,project);
   editingDefectId=null;
   currentPhoto='';
@@ -1055,7 +1092,12 @@ async function submitAddendum(e){
   };
   if(existing) Object.assign(existing,item);
   else list.push(item);
-  await saveAddendumCloud(projectId,item);
+  try{
+    await saveAddendumCloud(projectId,item);
+  }catch(error){
+    showCloudError(error);
+    return;
+  }
   if(project) queueReminder('addendum',item,project);
   editingAddendumId=null;
   closeOv('addendum');
@@ -1083,7 +1125,12 @@ async function submitProject(e){
     defects[newId]=[];
     addendum[newId]=[];
   }
-  await saveProjectCloud(projectData);
+  try{
+    await saveProjectCloud(projectData);
+  }catch(error){
+    showCloudError(error);
+    return;
+  }
   closeOv('project');
   editingProjectId=null;
   curProjId=newId;
