@@ -76,7 +76,32 @@ NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
 NEXT_PUBLIC_FIREBASE_APP_ID=
 ```
 
-目前 App 在未填 Firebase 設定時會使用前端暫存資料，方便先確認操作流程。後續可把專案、缺失與照片改接 Firestore / Cloud Storage。
+目前 prototype 已接 Firebase：登入使用 Authentication，專案 / 缺失 / 追加單寫入 Firestore，缺失照片上傳到 Cloud Storage。若 Firestore 還沒有資料，系統會先保留示範資料方便確認操作流程。
+
+## Firebase Authentication 登入
+
+目前 prototype 已接 Firebase Email/Password 登入，不使用 Google 登入。
+
+Firebase Console 需先完成：
+
+1. 到 `Authentication > Sign-in method` 啟用 `Email/Password`。
+2. 到 `Authentication > Users` 新增使用者：`service@shanchuandesign.com`。
+3. 使用 Firebase 後台設定的密碼登入系統。
+
+## Firestore / Storage 同步
+
+目前資料結構：
+
+- `projects/{projectId}`：專案基本資料。
+- `projects/{projectId}/defects/{defectId}`：缺失項目。
+- `projects/{projectId}/addendums/{addendumId}`：工程追加項目。
+- `Storage/projects/{projectId}/defects/{defectId}/...`：缺失照片。
+
+MVP 測試階段可先用 Firebase 測試模式；準備上線前建議改成「已登入使用者才可讀寫」：
+
+```js
+allow read, write: if request.auth != null;
+```
 
 ## Google Apps Script 提醒
 

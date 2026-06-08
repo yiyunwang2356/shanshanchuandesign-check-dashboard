@@ -43,17 +43,195 @@ const addendum={
 };
 
 const GAS_REMINDER_ENDPOINT='';
-let curProjId=1,curFilter='all',defectQuery='',currentPhoto='',pendingDefectData=null;
+const firebaseConfig={
+  apiKey:'AIzaSyCwJfUGn7VtzwSpsggEISdtQ06OEsUYVYI',
+  authDomain:'shanshanchuan-check-dashboard.firebaseapp.com',
+  projectId:'shanshanchuan-check-dashboard',
+  storageBucket:'shanshanchuan-check-dashboard.firebasestorage.app',
+  messagingSenderId:'336059215991',
+  appId:'1:336059215991:web:3ff38b0416c971fba79672',
+  measurementId:'G-NMMEBQ5ZP7'
+};
+let firebaseAuth=null,firebaseDb=null,firebaseStorage=null;
+let curProjId=1,curFilter='all',defectQuery='',currentPhoto='',currentPhotoFile=null,pendingDefectData=null;
 let projectQuery='',projectDesignerFilter='',projectStatusFilter='',defectDesignerFilter='',calendarProjectFilter='';
 let editingProjectId=null,editingDefectId=null,editingAddendumId=null;
 let pendingDelete=null;
 
 // ── LOGIN ──
-function handleLogin(e){
+function initFirebaseServices(){
+  if(firebaseAuth&&firebaseDb&&firebaseStorage) return {auth:firebaseAuth,db:firebaseDb,storage:firebaseStorage};
+  if(!window.firebase) return null;
+  const app=window.firebase.apps?.length?window.firebase.app():window.firebase.initializeApp(firebaseConfig);
+  firebaseAuth=window.firebase.auth(app);
+  firebaseDb=window.firebase.firestore(app);
+  firebaseStorage=window.firebase.storage(app);
+  return {auth:firebaseAuth,db:firebaseDb,storage:firebaseStorage};
+}
+
+function initFirebaseAuth(){
+  return initFirebaseServices()?.auth||null;
+}
+
+function normalizeProject(doc){
+  const data=doc.data();
+  return {
+    id:Number(data.id||doc.id),
+    name:data.name||'未命名專案',
+    client:data.client||'待填寫',
+    date:data.date||new Date().toISOString().split('T')[0],
+    designer:data.designer||'未指定',
+    email:data.email||'',
+    note:data.note||'',
+    status:data.status||'inprogress'
+  };
+}
+
+function normalizeItem(doc){
+  const data=doc.data();
+  return {
+    id:Number(data.id||doc.id),
+    trade:data.trade||'其他',
+    content:data.content||'',
+    qty:data.qty||'',
+    status:data.status||'pending',
+    deadline:data.deadline||'',
+    photo:data.photo||'',
+    note:data.note||''
+  };
+}
+
+function docData(data){
+  return {...data,updatedAt:new Date().toISOString()};
+}
+
+async function loadFirebaseData(){
+  if(!firebaseDb) return;
+  const snapshot=await firebaseDb.collection('projects').get();
+  if(snapshot.empty) return;
+
+  projects.splice(0,projects.length);
+  Object.keys(defects).forEach(key=>delete defects[key]);
+  Object.keys(addendum).forEach(key=>delete addendum[key]);
+
+  for(const projectDoc of snapshot.docs){
+    const project=normalizeProject(projectDoc);
+    projects.push(project);
+
+    const defectSnapshot=await projectDoc.ref.collection('defects').get();
+    defects[project.id]=defectSnapshot.docs
+      .map(normalizeItem)
+      .sort((a,b)=>new Date(a.deadline||'2999-12-31')-new Date(b.deadline||'2999-12-31'));
+
+    const addendumSnapshot=await projectDoc.ref.collection('addendums').get();
+    addendum[project.id]=addendumSnapshot.docs
+      .map(normalizeItem)
+      .sort((a,b)=>new Date(a.deadline||'2999-12-31')-new Date(b.deadline||'2999-12-31'));
+  }
+
+  projects.sort((a,b)=>new Date(b.date)-new Date(a.date));
+  curProjId=projects[0]?.id||0;
+}
+
+function refreshCurrentView(){
+  populateSmartFilters();
+  populateProjectSelects();
+  renderDashboard();
+  renderProjects();
+  syncProjectHeader();
+  renderProjectTabs('defect-project-tabs');
+  renderDefects();
+  renderProjectTabs('pdf-project-tabs');
+  renderPDF();
+  updateBadges();
+}
+
+async function saveProjectCloud(project){
+  if(!firebaseDb) return;
+  await firebaseDb.collection('projects').doc(String(project.id)).set(docData(project),{merge:true});
+}
+
+async function saveDefectCloud(projectId,item){
+  if(!firebaseDb) return;
+  const project=projects.find(p=>p.id===projectId);
+  if(project) await saveProjectCloud(project);
+  await firebaseDb.collection('projects').doc(String(projectId))
+    .collection('defects').doc(String(item.id)).set(docData(item),{merge:true});
+}
+
+async function saveAddendumCloud(projectId,item){
+  if(!firebaseDb) return;
+  const project=projects.find(p=>p.id===projectId);
+  if(project) await saveProjectCloud(project);
+  await firebaseDb.collection('projects').doc(String(projectId))
+    .collection('addendums').doc(String(item.id)).set(docData(item),{merge:true});
+}
+
+async function deleteCloudRecord(type,id,projectId=curProjId){
+  if(!firebaseDb) return;
+  if(type==='project'){
+    const ref=firebaseDb.collection('projects').doc(String(id));
+    const [defectSnapshot,addendumSnapshot]=await Promise.all([
+      ref.collection('defects').get(),
+      ref.collection('addendums').get()
+    ]);
+    const batch=firebaseDb.batch();
+    defectSnapshot.docs.forEach(doc=>batch.delete(doc.ref));
+    addendumSnapshot.docs.forEach(doc=>batch.delete(doc.ref));
+    batch.delete(ref);
+    await batch.commit();
+    return;
+  }
+  const collection=type==='addendum'?'addendums':'defects';
+  await firebaseDb.collection('projects').doc(String(projectId))
+    .collection(collection).doc(String(id)).delete();
+}
+
+async function uploadDefectPhoto(projectId,defectId,file){
+  if(!firebaseStorage||!file) return currentPhoto;
+  const safeName=file.name.replace(/[^\w.-]+/g,'-');
+  const ref=firebaseStorage.ref(`projects/${projectId}/defects/${defectId}/${Date.now()}-${safeName}`);
+  await ref.put(file);
+  return ref.getDownloadURL();
+}
+
+function getLoginErrorMessage(error){
+  const code=error?.code||'';
+  if(code.includes('invalid-credential')||code.includes('wrong-password')) return 'Email 或密碼不正確，請再確認一次。';
+  if(code.includes('user-not-found')) return '找不到這個帳號，請先到 Firebase Authentication 建立使用者。';
+  if(code.includes('too-many-requests')) return '嘗試次數過多，請稍後再試或重設密碼。';
+  if(code.includes('network-request-failed')) return '網路連線失敗，請確認網路後再試。';
+  return '登入失敗，請確認 Firebase 已啟用 Email/Password 登入。';
+}
+
+async function handleLogin(e){
   e.preventDefault();
   const btn=e.target.querySelector('button[type=submit]');
-  btn.textContent='登入中…';btn.disabled=true;
-  setTimeout(()=>{showPage('app');showView('projects');},650);
+  const err=document.getElementById('login-error');
+  const email=document.getElementById('login-email').value.trim();
+  const password=document.getElementById('login-password').value;
+  if(err){
+    err.classList.add('is-hidden');
+    err.textContent='';
+  }
+  btn.textContent='登入中…';
+  btn.disabled=true;
+  try{
+    const auth=initFirebaseAuth();
+    if(!auth) throw new Error('Firebase SDK 尚未載入');
+    await auth.signInWithEmailAndPassword(email,password);
+    await loadFirebaseData();
+    refreshCurrentView();
+    showPage('app');
+    showView('projects');
+  }catch(error){
+    if(err){
+      err.textContent=getLoginErrorMessage(error);
+      err.classList.remove('is-hidden');
+    }
+    btn.textContent='登入';
+    btn.disabled=false;
+  }
 }
 function showPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -590,11 +768,12 @@ function setDefectFilter(f,el=null){
   renderDefects();
 }
 
-function toggleStatus(id){
+async function toggleStatus(id){
   const d=defects[curProjId];
   const item=d.find(x=>x.id===id);
   if(item){
     item.status=item.status==='pending'?'done':'pending';
+    await saveDefectCloud(curProjId,item);
     renderDefects();
     renderProjectTabs('defect-project-tabs');
     renderDashboard();
@@ -658,12 +837,16 @@ function renderPDF(){
     : '<tr><td colspan="6" class="pdf-empty-cell">目前無追加工程項目</td></tr>';
 }
 
-function toggleReportCheck(type,id,button){
+async function toggleReportCheck(type,id,button){
   const source=type==='addendum'?addendum:defects;
   const item=(source[curProjId]||[]).find(x=>x.id===id);
-  if(item) item.status=item.status==='done'?'pending':'done';
-  button.classList.toggle('checked');
-  updateBadges();
+  if(item){
+    item.status=item.status==='done'?'pending':'done';
+    if(type==='addendum') await saveAddendumCloud(curProjId,item);
+    else await saveDefectCloud(curProjId,item);
+    button.classList.toggle('checked');
+    updateBadges();
+  }
 }
 
 function switchPdfTab(idx,el){
@@ -683,6 +866,7 @@ function openOv(name,id=null){
     const d=new Date(); d.setDate(d.getDate()+7);
     const item=id?(defects[curProjId]||[]).find(x=>x.id===id):null;
     currentPhoto=item?.photo||'';
+    currentPhotoFile=null;
     document.querySelector('#ov-defect .panel-title').textContent=id?'編輯缺失項目':'新增缺失項目';
     document.getElementById('f-deadline').value=item?.deadline||d.toISOString().split('T')[0];
     document.getElementById('f-project').value=String(curProjId);
@@ -751,9 +935,10 @@ function closeDeleteConfirm(e){
   document.getElementById('delete-confirm').classList.add('is-hidden');
 }
 
-function confirmDelete(){
+async function confirmDelete(){
   if(!pendingDelete) return;
   const {type,id}=pendingDelete;
+  const projectId=curProjId;
   if(type==='project'){
     const index=projects.findIndex(p=>p.id===id);
     if(index>-1) projects.splice(index,1);
@@ -766,6 +951,7 @@ function confirmDelete(){
     const index=list.findIndex(x=>x.id===id);
     if(index>-1) list.splice(index,1);
   }
+  await deleteCloudRecord(type,id,projectId);
   closeDeleteConfirm();
   refreshAfterDelete(type);
 }
@@ -795,11 +981,11 @@ function refreshAfterDelete(type){
   renderPDF();
 }
 
-function submitDefect(e){
+async function submitDefect(e){
   e.preventDefault();
   const data=gatherDefectFormData();
   if(!data.content) return;
-  saveDefectData(data);
+  await saveDefectData(data);
 }
 
 function gatherDefectFormData(){
@@ -817,19 +1003,22 @@ function gatherDefectFormData(){
   };
 }
 
-function saveDefectData(data){
+async function saveDefectData(data){
   const {projectId,content,trade,qty,status,deadline,photo,note}=data;
   curProjId=projectId;
   const project=projects.find(p=>p.id===projectId);
   const d=defects[projectId]=defects[projectId]||[];
   const existing=editingDefectId?d.find(x=>x.id===editingDefectId):null;
   const newId=existing?.id||(d.length?Math.max(...d.map(x=>x.id))+1:1);
-  const item={id:newId,content,trade,qty,status,deadline,photo,note};
+  const cloudPhoto=currentPhotoFile?await uploadDefectPhoto(projectId,newId,currentPhotoFile):photo;
+  const item={id:newId,content,trade,qty,status,deadline,photo:cloudPhoto,note};
   if(existing) Object.assign(existing,item);
   else d.push(item);
+  await saveDefectCloud(projectId,item);
   if(project) queueReminder('defect',item,project);
   editingDefectId=null;
   currentPhoto='';
+  currentPhotoFile=null;
   pendingDefectData=null;
   closeOv('defect');
   syncProjectHeader();
@@ -845,7 +1034,7 @@ function saveDefectData(data){
   document.getElementById('detail-count').textContent=d.length+' 項缺失';
 }
 
-function submitAddendum(e){
+async function submitAddendum(e){
   e.preventDefault();
   const content=document.getElementById('a-content').value.trim();
   if(!content) return;
@@ -866,6 +1055,7 @@ function submitAddendum(e){
   };
   if(existing) Object.assign(existing,item);
   else list.push(item);
+  await saveAddendumCloud(projectId,item);
   if(project) queueReminder('addendum',item,project);
   editingAddendumId=null;
   closeOv('addendum');
@@ -875,12 +1065,12 @@ function submitAddendum(e){
   updateBadges();
 }
 
-function submitProject(e){
+async function submitProject(e){
   e.preventDefault();
   const name=document.getElementById('p-name').value.trim();
   if(!name) return;
   const existing=editingProjectId?projects.find(p=>p.id===editingProjectId):null;
-  const newId=existing?.id||Math.max(...projects.map(p=>p.id))+1;
+  const newId=existing?.id||(projects.length?Math.max(...projects.map(p=>p.id))+1:1);
   const projectData={id:newId,name,
     client:document.getElementById('p-client').value||'待填寫',
     date:document.getElementById('p-date').value||new Date().toISOString().split('T')[0],
@@ -893,6 +1083,7 @@ function submitProject(e){
     defects[newId]=[];
     addendum[newId]=[];
   }
+  await saveProjectCloud(projectData);
   closeOv('project');
   editingProjectId=null;
   curProjId=newId;
@@ -904,6 +1095,7 @@ function submitProject(e){
 
 function previewPhoto(input){
   if(input.files&&input.files[0]){
+    currentPhotoFile=input.files[0];
     currentPhoto=URL.createObjectURL(input.files[0]);
     renderPhotoPreview(currentPhoto);
   }
@@ -928,6 +1120,7 @@ function renderPhotoPreview(src){
 function removeDefectPhoto(event){
   if(event) event.stopPropagation();
   currentPhoto='';
+  currentPhotoFile=null;
   document.getElementById('photo-file').value='';
   renderPhotoPreview('');
 }

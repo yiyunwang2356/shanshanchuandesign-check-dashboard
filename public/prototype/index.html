@@ -25,12 +25,13 @@
       <div class="form-grid form-grid-loose">
         <div class="field">
           <label>公司 Email</label>
-          <input type="email" placeholder="service@shanchuandesign.com" value="service@shanchuandesign.com" autocomplete="email">
+          <input type="email" id="login-email" placeholder="service@shanchuandesign.com" value="service@shanchuandesign.com" autocomplete="email" required>
         </div>
         <div class="field mt-2">
           <label>密碼</label>
-          <input type="password" placeholder="••••••••" value="password" autocomplete="current-password">
+          <input type="password" id="login-password" placeholder="請輸入 Firebase 密碼" autocomplete="current-password" required>
         </div>
+        <div class="login-error is-hidden" id="login-error"></div>
         <button type="submit" class="btn btn-primary btn-lg btn-full mt-4">
           登入
           <svg width="16" height="16" viewBox="0 0 24 24" class="icon-line" stroke-width="2.2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
@@ -588,6 +589,10 @@
   </div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-storage-compat.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
