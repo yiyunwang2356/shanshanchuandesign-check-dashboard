@@ -270,6 +270,18 @@ function restoreAuthSession(){
   });
 }
 
+async function logout(){
+  try{
+    const auth=initFirebaseAuth();
+    if(auth) await auth.signOut();
+  }catch(error){
+    console.warn('Logout skipped',error);
+  }
+  showPage('login');
+  const password=document.getElementById('login-password');
+  if(password) password.value='';
+}
+
 function showPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
@@ -922,7 +934,12 @@ async function downloadPDF(){
     button.disabled=true;
     button.textContent='產生中...';
   }
-  document.body.classList.add('exporting-pdf');
+  const cloneWrap=document.createElement('div');
+  cloneWrap.className='pdf-export-clone';
+  const clone=page.cloneNode(true);
+  clone.querySelectorAll('.table-edit').forEach(el=>el.remove());
+  cloneWrap.appendChild(clone);
+  document.body.appendChild(cloneWrap);
   try{
     await window.html2pdf().set({
       margin:0,
@@ -930,14 +947,14 @@ async function downloadPDF(){
       image:{type:'jpeg',quality:0.98},
       html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff',scrollX:0,scrollY:0},
       jsPDF:{unit:'pt',format:'a4',orientation:'portrait'},
-      pagebreak:{mode:['css','legacy']}
-    }).from(page).save();
+      pagebreak:{mode:['avoid-all','css','legacy']}
+    }).from(clone).save();
   }catch(error){
     console.error('PDF download failed',error);
     alert('PDF 下載失敗，將改用列印功能。請在列印視窗選擇「另存為 PDF」。');
     window.print();
   }finally{
-    document.body.classList.remove('exporting-pdf');
+    cloneWrap.remove();
     if(button){
       button.disabled=false;
       button.innerHTML=originalHtml;

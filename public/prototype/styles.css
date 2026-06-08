@@ -160,6 +160,8 @@ button,:where([role="button"]){transition:opacity var(--t),background var(--t),c
 .user-info{flex:1;min-width:0}
 .user-name{font-size:0.8125rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .user-role{font-size:10px;color:var(--text-3)}
+.logout-btn{width:32px;height:32px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;color:var(--text-3);flex-shrink:0}
+.logout-btn:hover{background:var(--bg);color:var(--red)}
 .theme-btn{width:32px;height:32px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;color:var(--text-3);flex-shrink:0}
 .theme-btn:hover{background:var(--bg);color:var(--text-1)}
 
@@ -450,6 +452,9 @@ button,:where([role="button"]){transition:opacity var(--t),background var(--t),c
 .pdf-badge-done{background:#e8f5e9;color:#2e7d32}
 .pdf-footer{margin-top:86px;padding-top:30px;border-top:1px solid #d8d8d8;display:flex;align-items:flex-end;justify-content:space-between}
 .pdf-footer-text{font-size:10.5px;color:#bbb}
+.pdf-footer-addendum{flex-direction:column-reverse;align-items:stretch;gap:22px}
+.pdf-footer-addendum .pdf-signature-row{justify-content:flex-end}
+.pdf-footer-addendum .pdf-footer-text{align-self:flex-start;line-height:1.5}
 .pdf-sign-box{text-align:center}
 .pdf-sign-line{width:120px;height:1px;background:#333;margin:0 auto var(--s2)}
 .pdf-sign-label{font-size:10px;color:#888}
@@ -495,7 +500,7 @@ button,:where([role="button"]){transition:opacity var(--t),background var(--t),c
 .note-text{font-size:11px;color:#888}
 .pdf-empty-cell{text-align:center;padding:24px;color:#aaa;font-size:13px}
 .exporting-pdf .pdf-page{
-  display:block!important;width:794px!important;min-height:1123px!important;
+  display:block!important;width:794px!important;min-height:0!important;
   padding:48px 56px!important;background:#fff!important;
 }
 .exporting-pdf .pdf-table .col-img,
@@ -504,6 +509,20 @@ button,:where([role="button"]){transition:opacity var(--t),background var(--t),c
 .exporting-pdf .pdf-report-meta{text-align:right!important;justify-items:end!important}
 .exporting-pdf .pdf-report-meta .pdf-info-grid{grid-template-columns:repeat(2,minmax(120px,1fr))!important}
 .exporting-pdf .table-edit{display:none!important}
+.pdf-export-clone{
+  position:fixed;left:-9999px;top:0;width:794px;background:#fff;z-index:-1;
+  pointer-events:none;overflow:visible;
+}
+.pdf-export-clone .pdf-page{
+  display:block!important;width:794px!important;min-height:0!important;
+  margin:0!important;padding:48px 56px!important;background:#fff!important;
+}
+.pdf-export-clone .pdf-table .col-img,
+.pdf-export-clone .pdf-table .col-note{display:table-cell!important}
+.pdf-export-clone .pdf-letterhead{grid-template-columns:170px 1fr!important;gap:var(--s8)!important}
+.pdf-export-clone .pdf-report-meta{text-align:right!important;justify-items:end!important}
+.pdf-export-clone .pdf-report-meta .pdf-info-grid{grid-template-columns:repeat(2,minmax(120px,1fr))!important}
+.pdf-export-clone .table-edit{display:none!important}
 .pdf-btn:disabled{opacity:0.65;cursor:wait}
 .logo-fallback{font-size:1.1rem;font-weight:700;color:#05334b;letter-spacing:0}
 .logo-fallback-inline{font-size:0.875rem}
@@ -563,6 +582,9 @@ button,:where([role="button"]){transition:opacity var(--t),background var(--t),c
   .pdf-table .col-img,.pdf-table .col-note{display:none}
   .pdf-letterhead{grid-template-columns:1fr;gap:var(--s3)}
   .pdf-report-meta{text-align:left;justify-items:start}
+  .pdf-footer{flex-direction:column-reverse;align-items:stretch;gap:22px}
+  .pdf-footer .pdf-signature-row{justify-content:flex-end;gap:44px}
+  .pdf-footer-text{align-self:flex-start;line-height:1.5}
 }
 @media(max-width:480px){
   .login-card{padding:var(--s8) var(--s5)}
