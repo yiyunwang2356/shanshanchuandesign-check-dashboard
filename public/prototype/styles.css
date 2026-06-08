@@ -494,6 +494,17 @@ button,:where([role="button"]){transition:opacity var(--t),background var(--t),c
 .text-center{text-align:center}
 .note-text{font-size:11px;color:#888}
 .pdf-empty-cell{text-align:center;padding:24px;color:#aaa;font-size:13px}
+.exporting-pdf .pdf-page{
+  display:block!important;width:794px!important;min-height:1123px!important;
+  padding:48px 56px!important;background:#fff!important;
+}
+.exporting-pdf .pdf-table .col-img,
+.exporting-pdf .pdf-table .col-note{display:table-cell!important}
+.exporting-pdf .pdf-letterhead{grid-template-columns:170px 1fr!important;gap:var(--s8)!important}
+.exporting-pdf .pdf-report-meta{text-align:right!important;justify-items:end!important}
+.exporting-pdf .pdf-report-meta .pdf-info-grid{grid-template-columns:repeat(2,minmax(120px,1fr))!important}
+.exporting-pdf .table-edit{display:none!important}
+.pdf-btn:disabled{opacity:0.65;cursor:wait}
 .logo-fallback{font-size:1.1rem;font-weight:700;color:#05334b;letter-spacing:0}
 .logo-fallback-inline{font-size:0.875rem}
 .logo-fallback-report span{font-size:10px;font-weight:400;color:#888;letter-spacing:0.04em}

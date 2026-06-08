@@ -876,6 +876,50 @@ function switchPdfTab(idx,el){
   document.getElementById('pdf-page-'+idx).classList.add('active');
 }
 
+function safeFileName(value){
+  return String(value||'驗收報告').replace(/[\\/:*?"<>|]+/g,'-').trim();
+}
+
+async function downloadPDF(){
+  renderPDF();
+  const page=document.querySelector('.pdf-page.active');
+  if(!page) return;
+  if(!window.html2pdf){
+    window.print();
+    return;
+  }
+  const p=projects.find(x=>x.id===curProjId);
+  const isAddendum=page.id==='pdf-page-1';
+  const filename=`${safeFileName(p?.name)}-${isAddendum?'工程追加單':'驗收缺失報告'}.pdf`;
+  const button=document.querySelector('.pdf-btn[onclick="downloadPDF()"]');
+  const originalHtml=button?.innerHTML||'下載 PDF';
+  if(button){
+    button.disabled=true;
+    button.textContent='產生中...';
+  }
+  document.body.classList.add('exporting-pdf');
+  try{
+    await window.html2pdf().set({
+      margin:0,
+      filename,
+      image:{type:'jpeg',quality:0.98},
+      html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff',scrollX:0,scrollY:0},
+      jsPDF:{unit:'pt',format:'a4',orientation:'portrait'},
+      pagebreak:{mode:['css','legacy']}
+    }).from(page).save();
+  }catch(error){
+    console.error('PDF download failed',error);
+    alert('PDF 下載失敗，將改用列印功能。請在列印視窗選擇「另存為 PDF」。');
+    window.print();
+  }finally{
+    document.body.classList.remove('exporting-pdf');
+    if(button){
+      button.disabled=false;
+      button.innerHTML=originalHtml;
+    }
+  }
+}
+
 // ── PANELS ──
 function openOv(name,id=null){
   document.getElementById('ov-'+name).classList.add('open');
