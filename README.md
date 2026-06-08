@@ -88,11 +88,11 @@ Firebase Console 需先完成：
 2. 到 `Authentication > Users` 新增使用者：`service@shanchuandesign.com`。
 3. 使用 Firebase 後台設定的密碼登入系統。
 
-## Firebase 前端設定檔
+## Firebase 前端設定檔與部署
 
 GitHub 會把 Google / Firebase Web API Key 判定為 secret，所以正式設定不要直接寫在 `app.js`。
 
-本機測試時請複製範本：
+本機測試時可複製範本：
 
 ```bash
 cp public/prototype/firebase-config.example.js public/prototype/firebase-config.js
@@ -100,7 +100,23 @@ cp public/prototype/firebase-config.example.js public/prototype/firebase-config.
 
 再把 `public/prototype/firebase-config.js` 內的欄位換成 Firebase Console 提供的 Web App config。這個檔案已被 `.gitignore` 忽略，不要 commit。
 
-部署到正式網域時，也需要在部署環境提供同名檔案 `public/prototype/firebase-config.js`，否則登入會提示 Firebase 設定尚未載入。
+線上部署不需要從本機提供這個檔案。GitHub Actions 會從 repository secret `FIREBASE_CONFIG_JSON` 自動產生 `public/prototype/firebase-config.js`，再部署到 GitHub Pages。
+
+`FIREBASE_CONFIG_JSON` 格式如下：
+
+```json
+{
+  "apiKey": "YOUR_FIREBASE_WEB_API_KEY",
+  "authDomain": "YOUR_PROJECT_ID.firebaseapp.com",
+  "projectId": "YOUR_PROJECT_ID",
+  "storageBucket": "YOUR_PROJECT_ID.firebasestorage.app",
+  "messagingSenderId": "YOUR_MESSAGING_SENDER_ID",
+  "appId": "YOUR_FIREBASE_APP_ID",
+  "measurementId": "YOUR_MEASUREMENT_ID"
+}
+```
+
+GitHub Pages 設定請選 `GitHub Actions` 作為部署來源。每次 push 到 `main` 後，workflow 會自動更新正式網址。
 
 ## Firestore / Storage 同步
 
