@@ -996,6 +996,10 @@ async function downloadPDF(){
     button.disabled=true;
     button.textContent='開啟中...';
   }
+  const previewWindow=window.open('','_blank');
+  if(previewWindow){
+    previewWindow.document.write('<!doctype html><title>PDF 產生中...</title><body style="font-family:-apple-system,BlinkMacSystemFont,sans-serif;padding:24px;color:#05334b">PDF 產生中...</body>');
+  }
   const cloneWrap=document.createElement('div');
   cloneWrap.className='pdf-export-clone';
   const exportPage=document.createElement('div');
@@ -1018,28 +1022,26 @@ async function downloadPDF(){
     const pdf=new jsPDF({unit:'pt',format:'a4',orientation:'portrait'});
     const pageW=pdf.internal.pageSize.getWidth();
     const pageH=pdf.internal.pageSize.getHeight();
-    const margin={top:36,right:40,bottom:36,left:40};
-    const contentW=pageW-margin.left-margin.right;
-    const contentH=pageH-margin.top-margin.bottom;
-    const imgH=canvas.height*contentW/canvas.width;
+    const imgH=canvas.height*pageW/canvas.width;
     const imgData=canvas.toDataURL('image/jpeg',0.98);
-    const pageCount=Math.max(1,Math.ceil(Math.max(0,imgH-8)/contentH));
+    const pageCount=Math.max(1,Math.ceil(Math.max(0,imgH-8)/pageH));
 
     for(let i=0;i<pageCount;i++){
       if(i>0) pdf.addPage();
-      pdf.addImage(imgData,'JPEG',margin.left,margin.top-(i*contentH),contentW,imgH);
+      pdf.addImage(imgData,'JPEG',0,-(i*pageH),pageW,imgH);
     }
     pdf.setProperties({title:filename.replace(/\.pdf$/,'')});
     const blobUrl=URL.createObjectURL(pdf.output('blob'));
-    const opened=window.open(blobUrl,'_blank','noopener,noreferrer');
-    if(!opened){
+    if(previewWindow){
+      previewWindow.location.href=blobUrl;
+      setTimeout(()=>URL.revokeObjectURL(blobUrl),60000);
+    }else{
       pdf.save(filename);
       URL.revokeObjectURL(blobUrl);
-    }else{
-      setTimeout(()=>URL.revokeObjectURL(blobUrl),60000);
     }
   }catch(error){
     console.error('PDF download failed',error);
+    if(previewWindow) previewWindow.close();
     alert('PDF 下載失敗，將改用列印功能。請在列印視窗選擇「另存為 PDF」。');
     window.print();
   }finally{
