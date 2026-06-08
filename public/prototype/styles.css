@@ -97,6 +97,17 @@ button,:where([role="button"]){transition:opacity var(--t),background var(--t),c
 .field-note{font-size:0.7rem;line-height:1.45;color:var(--text-3)}
 .field-note.warn{color:var(--orange)}
 .field-note.ok{color:var(--brand)}
+.member-picker{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.member-choice{
+  display:inline-flex;align-items:center;gap:6px;max-width:100%;
+  border:1px solid var(--border-solid);background:var(--surface);border-radius:999px;
+  padding:6px 10px;font-size:0.75rem;font-weight:700;color:var(--brand);
+}
+.member-choice:hover{background:var(--brand-paler);border-color:var(--brand-pale)}
+.member-choice small{
+  max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  font-size:0.68rem;font-weight:500;color:var(--text-3);
+}
 .field input,.field textarea,.field select{
   background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r-sm);
   padding:9px 12px;font-size:16px;outline:none;width:100%;

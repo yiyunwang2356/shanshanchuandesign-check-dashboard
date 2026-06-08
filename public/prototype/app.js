@@ -765,9 +765,28 @@ function populateProjectSelects(){
   });
 }
 
+function escapeHtml(value){
+  return String(value??'').replace(/[&<>"']/g,char=>({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[char]));
+}
+
+function escapeAttr(value){
+  return String(value??'').replace(/[\\']/g,char=>char==='\\'?'\\\\':'\\\'');
+}
+
 function populatePeopleList(){
   const list=document.getElementById('people-list');
   if(list) list.innerHTML=people.map(p=>`<option value="${p.name}">${p.email}</option>`).join('');
+  const picker=document.getElementById('member-picker');
+  if(picker){
+    picker.innerHTML=people.map(p=>`
+      <button type="button" class="member-choice" onclick="selectProjectDesigner('${escapeAttr(p.name)}','${escapeAttr(p.email)}')">
+        <span>${escapeHtml(p.name)}</span>
+        <small>${escapeHtml(p.email)}</small>
+      </button>
+    `).join('');
+  }
   const statusText=document.getElementById('members-status')?.textContent||'';
   if(people.length&&!statusText.includes('Firestore')){
     setMembersStatus(`目前可選 ${people.length} 位成員。`,'ok');
@@ -785,6 +804,11 @@ function fillAssigneeEmail(nameInputId,emailInputId){
   const emailInput=document.getElementById(emailInputId);
   const person=people.find(p=>p.name.trim().toLowerCase()===name.toLowerCase());
   emailInput.value=person?person.email:'';
+}
+
+function selectProjectDesigner(name,email){
+  document.getElementById('p-designer').value=name;
+  document.getElementById('p-email').value=email;
 }
 
 function getReminderDate(deadline){
@@ -993,7 +1017,11 @@ async function downloadPDF(){
   const originalHtml=button?.innerHTML||'下載 PDF';
   if(button){
     button.disabled=true;
-    button.textContent='產生中...';
+    button.textContent='開啟中...';
+  }
+  const previewWindow=window.open('','_blank');
+  if(previewWindow){
+    previewWindow.document.write('<!doctype html><title>PDF 產生中...</title><body style="font-family:-apple-system,BlinkMacSystemFont,sans-serif;padding:24px;color:#05334b">PDF 產生中，請稍候...</body>');
   }
   const cloneWrap=document.createElement('div');
   cloneWrap.className='pdf-export-clone';
@@ -1003,16 +1031,25 @@ async function downloadPDF(){
   document.body.appendChild(cloneWrap);
   try{
     document.body.classList.add('exporting-pdf');
-    await window.html2pdf().set({
+    const worker=window.html2pdf().set({
       margin:0,
       filename,
       image:{type:'jpeg',quality:0.98},
-      html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff',scrollX:0,scrollY:0},
+      html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff',scrollX:0,scrollY:0,windowWidth:1200},
       jsPDF:{unit:'pt',format:'a4',orientation:'portrait'},
       pagebreak:{mode:['avoid-all','css','legacy']}
-    }).from(clone).save();
+    }).from(clone).toPdf();
+    if(previewWindow){
+      const blob=await worker.outputPdf('blob');
+      const blobUrl=URL.createObjectURL(blob);
+      previewWindow.location.href=blobUrl;
+      setTimeout(()=>URL.revokeObjectURL(blobUrl),60000);
+    }else{
+      await worker.save();
+    }
   }catch(error){
     console.error('PDF download failed',error);
+    if(previewWindow) previewWindow.close();
     alert('PDF 下載失敗，請再試一次。若仍失敗，我們再改用更穩定的列印版。');
   }finally{
     document.body.classList.remove('exporting-pdf');
