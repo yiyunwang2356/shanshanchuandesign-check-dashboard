@@ -35,7 +35,7 @@ jobs:
           fi
           printf 'window.SHANCHUAN_FIREBASE_CONFIG = %s;\n' "$FIREBASE_CONFIG_JSON" > public/prototype/firebase-config.js
           mkdir -p deploy
-          cp index.html deploy/index.html
+          cp -R public/prototype/. deploy/
           cp -R public deploy/public
           if [ -f CNAME ]; then cp CNAME deploy/CNAME; fi
 
