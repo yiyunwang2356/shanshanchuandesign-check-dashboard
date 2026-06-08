@@ -288,6 +288,9 @@ async function handleLogin(e){
   try{
     const auth=initFirebaseAuth();
     if(!auth) throw new Error('Firebase SDK 尚未載入');
+    if(window.firebase?.auth?.Auth?.Persistence?.LOCAL){
+      await auth.setPersistence(window.firebase.auth.Auth.Persistence.LOCAL);
+    }
     await auth.signInWithEmailAndPassword(email,password);
     await loadFirebaseData();
     refreshCurrentView();
@@ -1002,11 +1005,50 @@ function safeFileName(value){
   return String(value||'驗收報告').replace(/[\\/:*?"<>|]+/g,'-').trim();
 }
 
+function loadScriptOnce(src){
+  return new Promise((resolve,reject)=>{
+    const existing=[...document.scripts].find(script=>script.src===src);
+    if(existing){
+      existing.addEventListener('load',resolve,{once:true});
+      existing.addEventListener('error',reject,{once:true});
+      if(existing.dataset.loaded==='true') resolve();
+      return;
+    }
+    const script=document.createElement('script');
+    script.src=src;
+    script.async=true;
+    script.onload=()=>{
+      script.dataset.loaded='true';
+      resolve();
+    };
+    script.onerror=reject;
+    document.head.appendChild(script);
+  });
+}
+
+async function ensurePdfLibrary(){
+  if(window.html2pdf) return true;
+  const sources=[
+    'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js',
+    'https://unpkg.com/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js'
+  ];
+  for(const src of sources){
+    try{
+      await loadScriptOnce(src);
+      if(window.html2pdf) return true;
+    }catch(error){
+      console.warn('PDF library load failed',src,error);
+    }
+  }
+  return false;
+}
+
 async function downloadPDF(){
   renderPDF();
   const page=document.querySelector('.pdf-page.active');
   if(!page) return;
-  if(!window.html2pdf){
+  const jsPDF=window.jspdf?.jsPDF;
+  if(!window.html2canvas||!jsPDF){
     window.print();
     return;
   }
@@ -1017,25 +1059,54 @@ async function downloadPDF(){
   const originalHtml=button?.innerHTML||'下載 PDF';
   if(button){
     button.disabled=true;
-    button.textContent='產生中...';
+    button.textContent='開啟中...';
+  }
+  const previewWindow=window.open('','_blank');
+  if(previewWindow){
+    previewWindow.document.write('<!doctype html><title>PDF 產生中...</title><body style="font-family:-apple-system,BlinkMacSystemFont,sans-serif;padding:24px;color:#05334b">PDF 產生中...</body>');
   }
   const cloneWrap=document.createElement('div');
   cloneWrap.className='pdf-export-clone';
+  const exportPage=document.createElement('div');
+  exportPage.className='pdf-export-page';
   const clone=page.cloneNode(true);
+  clone.classList.remove('pdf-page','active');
+  clone.classList.add('pdf-export-content');
   clone.querySelectorAll('.table-edit').forEach(el=>el.remove());
-  cloneWrap.appendChild(clone);
+  exportPage.appendChild(clone);
+  cloneWrap.appendChild(exportPage);
   document.body.appendChild(cloneWrap);
   try{
-    await window.html2pdf().set({
-      margin:0,
-      filename,
-      image:{type:'jpeg',quality:0.98},
-      html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff',scrollX:0,scrollY:0},
-      jsPDF:{unit:'pt',format:'a4',orientation:'portrait'},
-      pagebreak:{mode:['avoid-all','css','legacy']}
-    }).from(clone).save();
+    const canvas=await window.html2canvas(exportPage,{
+      scale:2,
+      useCORS:true,
+      backgroundColor:'#ffffff',
+      scrollX:0,
+      scrollY:0
+    });
+    const pdf=new jsPDF({unit:'pt',format:'a4',orientation:'portrait'});
+    const pageW=pdf.internal.pageSize.getWidth();
+    const pageH=pdf.internal.pageSize.getHeight();
+    const imgH=canvas.height*pageW/canvas.width;
+    const imgData=canvas.toDataURL('image/jpeg',0.98);
+    const pageCount=Math.max(1,Math.ceil(Math.max(0,imgH-8)/pageH));
+
+    for(let i=0;i<pageCount;i++){
+      if(i>0) pdf.addPage();
+      pdf.addImage(imgData,'JPEG',0,-(i*pageH),pageW,imgH);
+    }
+    pdf.setProperties({title:filename.replace(/\.pdf$/,'')});
+    const blobUrl=URL.createObjectURL(pdf.output('blob'));
+    if(previewWindow){
+      previewWindow.location.href=blobUrl;
+      setTimeout(()=>URL.revokeObjectURL(blobUrl),60000);
+    }else{
+      pdf.save(filename);
+      URL.revokeObjectURL(blobUrl);
+    }
   }catch(error){
     console.error('PDF download failed',error);
+    if(previewWindow) previewWindow.close();
     alert('PDF 下載失敗，將改用列印功能。請在列印視窗選擇「另存為 PDF」。');
     window.print();
   }finally{
