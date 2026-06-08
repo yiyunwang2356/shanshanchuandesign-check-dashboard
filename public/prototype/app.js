@@ -112,6 +112,11 @@ function showCloudError(error){
   alert(getCloudErrorMessage(error));
 }
 
+function showPhotoUploadWarning(error){
+  console.warn('Photo upload skipped',error);
+  alert('照片目前無法上傳，缺失資料會先儲存。等 Storage 設定完成後，再補上照片即可。');
+}
+
 async function loadFirebaseData(){
   if(!firebaseDb) return;
   const snapshot=await firebaseDb.collection('projects').get();
@@ -1033,18 +1038,18 @@ async function saveDefectData(data){
   try{
     cloudPhoto=currentPhotoFile?await uploadDefectPhoto(projectId,newId,currentPhotoFile):photo;
   }catch(error){
-    showCloudError(error);
-    return;
+    showPhotoUploadWarning(error);
+    cloudPhoto='';
   }
   const item={id:newId,content,trade,qty,status,deadline,photo:cloudPhoto,note};
-  if(existing) Object.assign(existing,item);
-  else d.push(item);
   try{
     await saveDefectCloud(projectId,item);
   }catch(error){
     showCloudError(error);
     return;
   }
+  if(existing) Object.assign(existing,item);
+  else d.push(item);
   if(project) queueReminder('defect',item,project);
   editingDefectId=null;
   currentPhoto='';
