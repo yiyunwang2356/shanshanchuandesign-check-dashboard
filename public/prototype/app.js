@@ -1006,7 +1006,8 @@ async function downloadPDF(){
   renderPDF();
   const page=document.querySelector('.pdf-page.active');
   if(!page) return;
-  if(!window.html2pdf){
+  const jsPDF=window.jspdf?.jsPDF;
+  if(!window.html2canvas||!jsPDF){
     alert('PDF 套件尚未載入完成，請稍等幾秒後再試一次。');
     return;
   }
@@ -1031,31 +1032,37 @@ async function downloadPDF(){
   document.body.appendChild(cloneWrap);
   try{
     document.body.classList.add('exporting-pdf');
-    const worker=window.html2pdf().set({
-      margin:0,
-      filename,
-      image:{type:'jpeg',quality:0.98},
-      html2canvas:{
-        scale:2,
-        useCORS:true,
-        backgroundColor:'#ffffff',
-        scrollX:0,
-        scrollY:0,
-        x:0,
-        y:0,
-        width:794,
-        windowWidth:794
-      },
-      jsPDF:{unit:'pt',format:'a4',orientation:'portrait'},
-      pagebreak:{mode:['avoid-all','css','legacy']}
-    }).from(clone).toPdf();
+    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+    const canvas=await window.html2canvas(clone,{
+      scale:2,
+      useCORS:true,
+      allowTaint:true,
+      backgroundColor:'#ffffff',
+      scrollX:0,
+      scrollY:0,
+      windowWidth:794,
+      width:794,
+      height:clone.scrollHeight
+    });
+    const pdf=new jsPDF({unit:'pt',format:'a4',orientation:'portrait'});
+    const pageW=pdf.internal.pageSize.getWidth();
+    const pageH=pdf.internal.pageSize.getHeight();
+    const imgW=pageW;
+    const imgH=canvas.height*imgW/canvas.width;
+    const imgData=canvas.toDataURL('image/jpeg',0.98);
+    const pageCount=Math.max(1,Math.ceil(imgH/pageH));
+    for(let i=0;i<pageCount;i++){
+      if(i>0) pdf.addPage();
+      pdf.addImage(imgData,'JPEG',0,-(i*pageH),imgW,imgH);
+    }
+    pdf.setProperties({title:filename.replace(/\.pdf$/,'')});
     if(previewWindow){
-      const blob=await worker.outputPdf('blob');
+      const blob=pdf.output('blob');
       const blobUrl=URL.createObjectURL(blob);
       previewWindow.location.href=blobUrl;
       setTimeout(()=>URL.revokeObjectURL(blobUrl),60000);
     }else{
-      await worker.save();
+      pdf.save(filename);
     }
   }catch(error){
     console.error('PDF download failed',error);
