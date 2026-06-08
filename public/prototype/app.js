@@ -1013,7 +1013,7 @@ async function downloadPDF(){
   document.body.appendChild(cloneWrap);
   try{
     const canvas=await window.html2canvas(exportPage,{
-      scale:2,
+      scale:3,
       useCORS:true,
       backgroundColor:'#ffffff',
       scrollX:0,
@@ -1023,12 +1023,12 @@ async function downloadPDF(){
     const pageW=pdf.internal.pageSize.getWidth();
     const pageH=pdf.internal.pageSize.getHeight();
     const imgH=canvas.height*pageW/canvas.width;
-    const imgData=canvas.toDataURL('image/jpeg',0.98);
+    const imgData=canvas.toDataURL('image/png');
     const pageCount=Math.max(1,Math.ceil(Math.max(0,imgH-8)/pageH));
 
     for(let i=0;i<pageCount;i++){
       if(i>0) pdf.addPage();
-      pdf.addImage(imgData,'JPEG',0,-(i*pageH),pageW,imgH);
+      pdf.addImage(imgData,'PNG',0,-(i*pageH),pageW,imgH);
     }
     pdf.setProperties({title:filename.replace(/\.pdf$/,'')});
     const blobUrl=URL.createObjectURL(pdf.output('blob'));

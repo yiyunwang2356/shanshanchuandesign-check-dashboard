@@ -454,13 +454,13 @@ button,:where([role="button"]){transition:opacity var(--t),background var(--t),c
 .pdf-status-badge{display:inline-block;padding:2px 9px;border-radius:5px;font-size:10.5px;font-weight:700}
 .pdf-badge-pending{background:#fff3e0;color:#e65100}
 .pdf-badge-done{background:#e8f5e9;color:#2e7d32}
-.pdf-footer{margin-top:auto;padding-top:30px;border-top:1px solid #d8d8d8;display:flex;align-items:flex-end;justify-content:space-between;gap:24px}
-.pdf-footer-text{font-size:10.5px;color:#bbb}
+.pdf-footer{margin-top:auto;padding-top:30px;border-top:1px solid #d8d8d8;display:grid;grid-template-columns:1fr auto;align-items:end;gap:24px}
+.pdf-footer-text{font-size:10.5px;color:#bbb;line-height:1.4;align-self:end;padding-bottom:1px}
 .pdf-footer-addendum{flex-direction:column-reverse;align-items:stretch;gap:22px}
 .pdf-footer-addendum .pdf-signature-row{justify-content:flex-end}
 .pdf-footer-addendum .pdf-footer-text{align-self:flex-start;line-height:1.5}
-.pdf-sign-box{text-align:center}
-.pdf-sign-line{width:120px;height:1px;background:#333;margin:0 auto var(--s2)}
+.pdf-sign-box{text-align:center;padding-top:34px}
+.pdf-sign-line{width:120px;height:1px;background:#333;margin:0 auto 6px}
 .pdf-sign-label{font-size:10px;color:#888}
 
 /* ── ADDENDUM ── */
@@ -492,7 +492,7 @@ button,:where([role="button"]){transition:opacity var(--t),background var(--t),c
 .icon-muted{color:var(--text-3)}
 .icon-extra,.report-type-extra{color:#05334b}
 .required-mark{color:var(--red)}
-.pdf-signature-row{display:flex;gap:72px}
+.pdf-signature-row{display:flex;gap:42px;align-items:end}
 .photo-preview{margin-top:10px}
 .photo-preview-box{position:relative}
 .photo-preview-img{width:100%;max-height:150px;object-fit:cover;border-radius:10px}
@@ -590,9 +590,11 @@ button,:where([role="button"]){transition:opacity var(--t),background var(--t),c
   .pdf-table .col-img,.pdf-table .col-note{display:none}
   .pdf-letterhead{grid-template-columns:1fr;gap:var(--s3)}
   .pdf-report-meta{text-align:left;justify-items:start}
-  .pdf-footer{flex-direction:column-reverse;align-items:stretch;gap:22px}
-  .pdf-footer .pdf-signature-row{justify-content:flex-end;gap:44px}
+  .pdf-footer{grid-template-columns:1fr;align-items:stretch;gap:22px}
+  .pdf-footer .pdf-signature-row{justify-content:flex-end;gap:32px}
   .pdf-footer-text{align-self:flex-start;line-height:1.5}
+  .pdf-sign-box{padding-top:28px}
+  .pdf-sign-line{width:110px}
 }
 @media(max-width:480px){
   .login-card{padding:var(--s8) var(--s5)}
