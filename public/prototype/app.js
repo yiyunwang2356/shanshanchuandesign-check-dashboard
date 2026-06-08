@@ -1006,9 +1006,8 @@ async function downloadPDF(){
   renderPDF();
   const page=document.querySelector('.pdf-page.active');
   if(!page) return;
-  const jsPDF=window.jspdf?.jsPDF;
-  if(!window.html2canvas||!jsPDF){
-    alert('PDF 套件尚未載入完成，請重新整理頁面後再試一次。');
+  if(!window.html2pdf){
+    window.print();
     return;
   }
   const p=projects.find(x=>x.id===curProjId);
@@ -1018,60 +1017,28 @@ async function downloadPDF(){
   const originalHtml=button?.innerHTML||'下載 PDF';
   if(button){
     button.disabled=true;
-    button.textContent='開啟中...';
+    button.textContent='產生中...';
   }
-  const previewWindow=window.open('','_blank');
-  if(previewWindow){
-    previewWindow.document.write('<!doctype html><title>PDF 產生中...</title><body style="font-family:-apple-system,BlinkMacSystemFont,sans-serif;padding:24px;color:#05334b">PDF 產生中，請稍候...</body>');
-  }
-  const useMobileExport=window.matchMedia('(max-width: 840px)').matches;
-  const exportWidth=useMobileExport?560:794;
   const cloneWrap=document.createElement('div');
-  cloneWrap.className=`pdf-export-clone${useMobileExport?' pdf-export-mobile':''}`;
+  cloneWrap.className='pdf-export-clone';
   const clone=page.cloneNode(true);
   clone.querySelectorAll('.table-edit').forEach(el=>el.remove());
   cloneWrap.appendChild(clone);
   document.body.appendChild(cloneWrap);
   try{
-    document.body.classList.add('exporting-pdf');
-    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
-    const canvas=await window.html2canvas(clone,{
-      scale:2,
-      useCORS:true,
-      allowTaint:true,
-      backgroundColor:'#ffffff',
-      scrollX:0,
-      scrollY:0,
-      windowWidth:exportWidth,
-      width:exportWidth,
-      height:clone.scrollHeight
-    });
-    const pdf=new jsPDF({unit:'pt',format:'a4',orientation:'portrait'});
-    const pageW=pdf.internal.pageSize.getWidth();
-    const pageH=pdf.internal.pageSize.getHeight();
-    const imgW=pageW;
-    const imgH=canvas.height*imgW/canvas.width;
-    const imgData=canvas.toDataURL('image/jpeg',0.98);
-    const pageCount=Math.max(1,Math.ceil(imgH/pageH));
-    for(let i=0;i<pageCount;i++){
-      if(i>0) pdf.addPage();
-      pdf.addImage(imgData,'JPEG',0,-(i*pageH),imgW,imgH);
-    }
-    pdf.setProperties({title:filename.replace(/\.pdf$/,'')});
-    if(previewWindow){
-      const blob=pdf.output('blob');
-      const blobUrl=URL.createObjectURL(blob);
-      previewWindow.location.href=blobUrl;
-      setTimeout(()=>URL.revokeObjectURL(blobUrl),60000);
-    }else{
-      pdf.save(filename);
-    }
+    await window.html2pdf().set({
+      margin:0,
+      filename,
+      image:{type:'jpeg',quality:0.98},
+      html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff',scrollX:0,scrollY:0},
+      jsPDF:{unit:'pt',format:'a4',orientation:'portrait'},
+      pagebreak:{mode:['avoid-all','css','legacy']}
+    }).from(clone).save();
   }catch(error){
     console.error('PDF download failed',error);
-    if(previewWindow) previewWindow.close();
-    alert('PDF 下載失敗，請再試一次。若仍失敗，我們再改用更穩定的列印版。');
+    alert('PDF 下載失敗，將改用列印功能。請在列印視窗選擇「另存為 PDF」。');
+    window.print();
   }finally{
-    document.body.classList.remove('exporting-pdf');
     cloneWrap.remove();
     if(button){
       button.disabled=false;
