@@ -997,19 +997,24 @@ async function downloadPDF(){
   }
   const cloneWrap=document.createElement('div');
   cloneWrap.className='pdf-export-clone';
+  const exportPage=document.createElement('div');
+  exportPage.className='pdf-export-page';
   const clone=page.cloneNode(true);
+  clone.classList.remove('pdf-page','active');
+  clone.classList.add('pdf-export-content');
   clone.querySelectorAll('.table-edit').forEach(el=>el.remove());
-  cloneWrap.appendChild(clone);
+  exportPage.appendChild(clone);
+  cloneWrap.appendChild(exportPage);
   document.body.appendChild(cloneWrap);
   try{
     await window.html2pdf().set({
-      margin:0,
+      margin:[36,40,36,40],
       filename,
       image:{type:'jpeg',quality:0.98},
       html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff',scrollX:0,scrollY:0},
       jsPDF:{unit:'pt',format:'a4',orientation:'portrait'},
-      pagebreak:{mode:['avoid-all','css','legacy']}
-    }).from(clone).save();
+      pagebreak:{mode:['css','legacy'],avoid:['tr','.trade-group','.pdf-footer']}
+    }).from(exportPage).save();
   }catch(error){
     console.error('PDF download failed',error);
     alert('PDF 下載失敗，將改用列印功能。請在列印視窗選擇「另存為 PDF」。');
