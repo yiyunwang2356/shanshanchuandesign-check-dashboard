@@ -96,10 +96,12 @@ function normalizeItem(doc){
 
 function normalizeMember(doc){
   const data=doc.data();
+  const name=data.name||data.memberName||data.displayName||data.Name||data['姓名'];
+  const email=data.email||data.mail||data.Email||data['信箱'];
   return {
     id:doc.id,
-    name:String(data.name||'').trim(),
-    email:String(data.email||'').trim(),
+    name:String(name||'').trim(),
+    email:String(email||'').trim(),
     role:String(data.role||'member').trim().toLowerCase(),
     active:data.active!==false
   };
@@ -126,6 +128,14 @@ function showCloudError(error){
 function showPhotoUploadWarning(error){
   console.warn('Photo upload skipped',error);
   alert('照片目前無法上傳，缺失資料會先儲存。等 Storage 設定完成後，再補上照片即可。');
+}
+
+function setMembersStatus(message,type=''){
+  const el=document.getElementById('members-status');
+  if(!el) return;
+  el.textContent=message;
+  el.classList.toggle('ok',type==='ok');
+  el.classList.toggle('warn',type==='warn');
 }
 
 async function loadFirebaseData(){
@@ -163,14 +173,27 @@ async function loadFirebaseData(){
 
 async function loadMembersData(){
   if(!firebaseDb) return;
-  const snapshot=await firebaseDb.collection('members').get();
-  if(snapshot.empty) return;
-  const members=snapshot.docs
-    .map(normalizeMember)
-    .filter(member=>member.active&&member.name&&member.email);
-  if(!members.length) return;
-  console.info('Loaded members from Firestore',members);
-  people.splice(0,people.length,...members.map(({name,email,role})=>({name,email,role})));
+  setMembersStatus('正在讀取 members...', '');
+  try{
+    const snapshot=await firebaseDb.collection('members').get();
+    if(snapshot.empty){
+      setMembersStatus('Firestore 的 members 集合目前沒有資料，先使用預設名單。','warn');
+      return;
+    }
+    const rawMembers=snapshot.docs.map(normalizeMember);
+    const members=rawMembers.filter(member=>member.active&&member.name&&member.email);
+    if(!members.length){
+      setMembersStatus('members 已讀到，但缺少 name / email / active 欄位，先使用預設名單。','warn');
+      console.warn('Members documents were found but not usable',rawMembers);
+      return;
+    }
+    console.info('Loaded members from Firestore',members);
+    people.splice(0,people.length,...members.map(({name,email,role})=>({name,email,role})));
+    setMembersStatus(`已從 Firestore 載入 ${members.length} 位 members。`,'ok');
+  }catch(error){
+    console.error('Failed to load members',error);
+    setMembersStatus('members 讀取失敗，請確認 Firestore 規則允許讀取。','warn');
+  }
 }
 
 function refreshCurrentView(){
@@ -739,6 +762,10 @@ function populateProjectSelects(){
 function populatePeopleList(){
   const list=document.getElementById('people-list');
   if(list) list.innerHTML=people.map(p=>`<option value="${p.name}">${p.email}</option>`).join('');
+  const statusText=document.getElementById('members-status')?.textContent||'';
+  if(people.length&&!statusText.includes('Firestore')){
+    setMembersStatus(`目前可選 ${people.length} 位成員。`,'ok');
+  }
 }
 
 function populateTradeSelects(){
@@ -991,8 +1018,13 @@ async function downloadPDF(){
 }
 
 // ── PANELS ──
-function openOv(name,id=null){
+async function openOv(name,id=null){
   document.getElementById('ov-'+name).classList.add('open');
+  if(name==='project'){
+    await loadMembersData();
+    populatePeopleList();
+    populateSmartFilters();
+  }
   populateProjectSelects();
   populateTradeSelects();
   if(name==='defect'){
