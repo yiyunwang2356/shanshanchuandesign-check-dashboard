@@ -94,6 +94,17 @@ function normalizeItem(doc){
   };
 }
 
+function normalizeMember(doc){
+  const data=doc.data();
+  return {
+    id:doc.id,
+    name:data.name||'',
+    email:data.email||'',
+    role:data.role||'designer',
+    active:data.active!==false
+  };
+}
+
 function docData(data){
   return {...data,updatedAt:new Date().toISOString()};
 }
@@ -119,8 +130,12 @@ function showPhotoUploadWarning(error){
 
 async function loadFirebaseData(){
   if(!firebaseDb) return;
+  await loadMembersData();
   const snapshot=await firebaseDb.collection('projects').get();
-  if(snapshot.empty) return;
+  if(snapshot.empty){
+    populatePeopleList();
+    return;
+  }
 
   projects.splice(0,projects.length);
   Object.keys(defects).forEach(key=>delete defects[key]);
@@ -143,6 +158,19 @@ async function loadFirebaseData(){
 
   projects.sort((a,b)=>new Date(b.date)-new Date(a.date));
   curProjId=projects[0]?.id||0;
+  populatePeopleList();
+}
+
+async function loadMembersData(){
+  if(!firebaseDb) return;
+  const snapshot=await firebaseDb.collection('members').get();
+  if(snapshot.empty) return;
+  const members=snapshot.docs
+    .map(normalizeMember)
+    .filter(member=>member.active&&member.name&&member.email)
+    .filter(member=>!member.role||member.role==='designer');
+  if(!members.length) return;
+  people.splice(0,people.length,...members.map(({name,email,role})=>({name,email,role})));
 }
 
 function refreshCurrentView(){
@@ -567,7 +595,7 @@ function filterProjectsByStatus(v){
 }
 
 function populateSmartFilters(){
-  const designers=[...new Set(projects.map(p=>p.designer).filter(Boolean))];
+  const designers=[...new Set(projects.map(p=>p.designer).concat(people.map(p=>p.name)).filter(Boolean))];
   const designerOptions='<option value="">所有設計師</option>'+designers.map(name=>`<option value="${name}">${name}</option>`).join('');
   const projectDesigner=document.getElementById('project-designer-filter');
   if(projectDesigner){
