@@ -982,6 +982,10 @@ async function downloadPDF(){
   renderPDF();
   const page=document.querySelector('.pdf-page.active');
   if(!page) return;
+  if(!window.html2pdf){
+    alert('PDF 套件尚未載入完成，請稍等幾秒後再試一次。');
+    return;
+  }
   const p=projects.find(x=>x.id===curProjId);
   const isAddendum=page.id==='pdf-page-1';
   const filename=`${safeFileName(p?.name)}-${isAddendum?'工程追加單':'驗收缺失報告'}.pdf`;
@@ -989,44 +993,30 @@ async function downloadPDF(){
   const originalHtml=button?.innerHTML||'下載 PDF';
   if(button){
     button.disabled=true;
-    button.textContent='開啟中...';
+    button.textContent='產生中...';
   }
+  const cloneWrap=document.createElement('div');
+  cloneWrap.className='pdf-export-clone';
+  const clone=page.cloneNode(true);
+  clone.querySelectorAll('.table-edit').forEach(el=>el.remove());
+  cloneWrap.appendChild(clone);
+  document.body.appendChild(cloneWrap);
   try{
-    const opened=window.open('','_blank');
-    if(!opened){
-      window.print();
-      return;
-    }
-    const clone=page.cloneNode(true);
-    clone.classList.remove('active');
-    clone.querySelectorAll('.table-edit').forEach(el=>el.remove());
-    opened.document.open();
-    opened.document.write(`<!doctype html>
-      <html lang="zh-TW">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>${filename.replace(/\.pdf$/,'')}</title>
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Serif+TC:wght@400;600&display=swap" rel="stylesheet">
-        <link rel="stylesheet" href="styles.css">
-        <style>
-          html,body{height:auto!important;overflow:auto!important;background:#f5f5f7!important}
-          body{padding:24px}
-          .pdf-page{display:flex!important}
-          .table-edit,.pdf-topbar,.pdf-tabs{display:none!important}
-          @media print{body{padding:0;background:#fff!important}.pdf-page{box-shadow:none!important}}
-        </style>
-      </head>
-      <body>${clone.outerHTML}</body>
-      </html>`);
-    opened.document.close();
+    document.body.classList.add('exporting-pdf');
+    await window.html2pdf().set({
+      margin:0,
+      filename,
+      image:{type:'jpeg',quality:0.98},
+      html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff',scrollX:0,scrollY:0},
+      jsPDF:{unit:'pt',format:'a4',orientation:'portrait'},
+      pagebreak:{mode:['avoid-all','css','legacy']}
+    }).from(clone).save();
   }catch(error){
     console.error('PDF download failed',error);
-    alert('PDF 下載失敗，將改用列印功能。請在列印視窗選擇「另存為 PDF」。');
-    window.print();
+    alert('PDF 下載失敗，請再試一次。若仍失敗，我們再改用更穩定的列印版。');
   }finally{
+    document.body.classList.remove('exporting-pdf');
+    cloneWrap.remove();
     if(button){
       button.disabled=false;
       button.innerHTML=originalHtml;
@@ -1368,9 +1358,140 @@ function setupLogoFallbacks(){
   });
 }
 
+// ── DATE PICKER ──
+const datePickerState={input:null,viewDate:new Date()};
+
+function parseISODate(value){
+  if(!value) return null;
+  const match=String(value).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if(!match) return null;
+  return new Date(Number(match[1]),Number(match[2])-1,Number(match[3]));
+}
+
+function formatISODate(date){
+  const y=date.getFullYear();
+  const m=String(date.getMonth()+1).padStart(2,'0');
+  const d=String(date.getDate()).padStart(2,'0');
+  return `${y}-${m}-${d}`;
+}
+
+function getDatePicker(){
+  let picker=document.getElementById('date-picker');
+  if(picker) return picker;
+  picker=document.createElement('div');
+  picker.id='date-picker';
+  picker.className='date-picker';
+  picker.addEventListener('click',event=>event.stopPropagation());
+  document.body.appendChild(picker);
+  return picker;
+}
+
+function positionDatePicker(){
+  const picker=getDatePicker();
+  const input=datePickerState.input;
+  if(!input) return;
+  const rect=input.getBoundingClientRect();
+  const gap=8;
+  const width=Math.min(360,window.innerWidth-24);
+  let left=Math.min(Math.max(12,rect.left),window.innerWidth-width-12);
+  let top=rect.bottom+gap;
+  const estimatedHeight=390;
+  if(top+estimatedHeight>window.innerHeight-12) top=Math.max(12,rect.top-estimatedHeight-gap);
+  picker.style.left=`${left}px`;
+  picker.style.top=`${top}px`;
+}
+
+function renderDatePicker(){
+  const picker=getDatePicker();
+  const input=datePickerState.input;
+  if(!input) return;
+  const selected=parseISODate(input.value);
+  const todayISO=formatISODate(new Date());
+  const view=new Date(datePickerState.viewDate.getFullYear(),datePickerState.viewDate.getMonth(),1);
+  const firstDay=view.getDay();
+  const start=new Date(view);
+  start.setDate(1-firstDay);
+  const weekdays=['日','一','二','三','四','五','六'];
+  const days=[];
+  for(let i=0;i<42;i++){
+    const date=new Date(start);
+    date.setDate(start.getDate()+i);
+    const iso=formatISODate(date);
+    const classes=['date-picker-day'];
+    if(date.getMonth()!==view.getMonth()) classes.push('muted');
+    if(iso===todayISO) classes.push('today');
+    if(selected&&iso===formatISODate(selected)) classes.push('selected');
+    days.push(`<button type="button" class="${classes.join(' ')}" data-date="${iso}">${date.getDate()}</button>`);
+  }
+  picker.innerHTML=`
+    <div class="date-picker-head">
+      <div class="date-picker-title">${view.getFullYear()} 年 ${view.getMonth()+1} 月</div>
+      <div class="date-picker-nav">
+        <button type="button" class="date-picker-btn" data-month="-1" aria-label="上一個月">‹</button>
+        <button type="button" class="date-picker-btn" data-month="1" aria-label="下一個月">›</button>
+      </div>
+    </div>
+    <div class="date-picker-grid">
+      ${weekdays.map(day=>`<div class="date-picker-weekday">${day}</div>`).join('')}
+      ${days.join('')}
+    </div>
+  `;
+  picker.querySelectorAll('[data-month]').forEach(button=>{
+    button.addEventListener('click',()=>{
+      datePickerState.viewDate.setMonth(datePickerState.viewDate.getMonth()+Number(button.dataset.month));
+      renderDatePicker();
+    });
+  });
+  picker.querySelectorAll('[data-date]').forEach(button=>{
+    button.addEventListener('click',()=>{
+      input.value=button.dataset.date;
+      input.dispatchEvent(new Event('input',{bubbles:true}));
+      input.dispatchEvent(new Event('change',{bubbles:true}));
+      closeDatePicker();
+    });
+  });
+  positionDatePicker();
+}
+
+function openDatePicker(input){
+  datePickerState.input=input;
+  datePickerState.viewDate=parseISODate(input.value)||new Date();
+  const picker=getDatePicker();
+  picker.classList.add('open');
+  renderDatePicker();
+}
+
+function closeDatePicker(){
+  const picker=getDatePicker();
+  picker.classList.remove('open');
+  datePickerState.input=null;
+}
+
+function setupDatePickers(){
+  document.querySelectorAll('.date-input').forEach(input=>{
+    input.addEventListener('click',event=>{
+      event.stopPropagation();
+      openDatePicker(input);
+    });
+    input.addEventListener('focus',()=>openDatePicker(input));
+  });
+  document.addEventListener('click',event=>{
+    const picker=document.getElementById('date-picker');
+    if(!picker?.classList.contains('open')) return;
+    if(event.target.closest('.date-picker')||event.target.closest('.date-input')) return;
+    closeDatePicker();
+  });
+  document.addEventListener('keydown',event=>{
+    if(event.key==='Escape') closeDatePicker();
+  });
+  window.addEventListener('resize',positionDatePicker);
+  window.addEventListener('scroll',positionDatePicker,true);
+}
+
 // ── INIT ──
 (function(){
   setupLogoFallbacks();
+  setupDatePickers();
   populatePeopleList();
   populateProjectSelects();
   populateTradeSelects();

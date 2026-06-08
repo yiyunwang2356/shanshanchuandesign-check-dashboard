@@ -266,7 +266,7 @@
               <div class="pdf-topbar-btns">
                 <button class="pdf-btn" onclick="downloadPDF()">
                   <svg width="13" height="13" viewBox="0 0 24 24" class="icon-line" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                  開啟 PDF
+                  下載 PDF
                 </button>
               </div>
             </div>
@@ -442,7 +442,7 @@
       <div class="form-row-2">
         <div class="field">
           <label>改善期限</label>
-          <input type="date" id="f-deadline">
+          <input type="text" id="f-deadline" class="date-input" placeholder="選擇日期" readonly>
         </div>
         <div class="field">
           <label>備註</label>
@@ -494,7 +494,7 @@
         </div>
         <div class="field">
           <label>驗收日期</label>
-          <input type="date" id="p-date">
+          <input type="text" id="p-date" class="date-input" placeholder="選擇日期" readonly>
         </div>
       </div>
       <div class="form-row-2">
@@ -556,7 +556,7 @@
       <div class="form-row-2">
         <div class="field">
           <label>截止日期</label>
-          <input type="date" id="a-deadline">
+          <input type="text" id="a-deadline" class="date-input" placeholder="選擇日期" readonly>
         </div>
         <div class="field">
           <label>備註</label>
@@ -597,6 +597,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-storage-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script src="firebase-config.js"></script>
 <script src="app.js"></script>
 </body>
