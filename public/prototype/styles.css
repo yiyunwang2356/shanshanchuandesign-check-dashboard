@@ -555,6 +555,43 @@ button,:where([role="button"]){transition:opacity var(--t),background var(--t),c
 .pdf-export-clone .pdf-sign-box{padding-top:34px!important}
 .pdf-export-clone .pdf-sign-line{width:120px!important}
 .pdf-export-clone .table-edit{display:none!important}
+.pdf-export-mobile{
+  width:560px!important;
+}
+.pdf-export-mobile .pdf-page{
+  width:560px!important;min-height:792px!important;padding:34px 38px!important;
+}
+.pdf-export-mobile .pdf-letterhead{
+  grid-template-columns:1fr!important;gap:10px!important;margin-bottom:18px!important;
+}
+.pdf-export-mobile .pdf-logo-block{gap:6px!important}
+.pdf-export-mobile .pdf-logo-img{width:132px!important;max-height:30px!important}
+.pdf-export-mobile .pdf-report-meta{
+  text-align:left!important;justify-items:start!important;
+}
+.pdf-export-mobile .pdf-report-meta .pdf-info-grid{
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;max-width:none!important;width:100%!important;
+  gap:4px 12px!important;
+}
+.pdf-export-mobile .pdf-title{font-size:1rem!important;margin-bottom:14px!important}
+.pdf-export-mobile .pdf-section-title{margin-bottom:8px!important}
+.pdf-export-mobile .pdf-table{
+  table-layout:fixed!important;font-size:11px!important;width:100%!important;
+}
+.pdf-export-mobile .pdf-table th{padding:7px 6px!important;font-size:9px!important}
+.pdf-export-mobile .pdf-table td{padding:8px 6px!important}
+.pdf-export-mobile .pdf-table .col-no{width:34px!important}
+.pdf-export-mobile .pdf-table .col-check{width:38px!important}
+.pdf-export-mobile .pdf-table .col-qty{width:42px!important}
+.pdf-export-mobile .pdf-table .col-img,
+.pdf-export-mobile .pdf-table .col-note{display:none!important}
+.pdf-export-mobile .trade-group td{font-size:11px!important;padding:7px 8px!important}
+.pdf-export-mobile .pdf-footer{
+  grid-template-columns:1fr auto!important;gap:18px!important;padding-top:24px!important;
+}
+.pdf-export-mobile .pdf-signature-row{gap:28px!important}
+.pdf-export-mobile .pdf-sign-line{width:92px!important}
+.pdf-export-mobile .pdf-footer-text{font-size:9.5px!important}
 .pdf-btn:disabled{opacity:0.65;cursor:wait}
 .logo-fallback{font-size:1.1rem;font-weight:700;color:#05334b;letter-spacing:0}
 .logo-fallback-inline{font-size:0.875rem}

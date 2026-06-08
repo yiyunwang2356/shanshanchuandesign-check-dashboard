@@ -1024,8 +1024,10 @@ async function downloadPDF(){
   if(previewWindow){
     previewWindow.document.write('<!doctype html><title>PDF 產生中...</title><body style="font-family:-apple-system,BlinkMacSystemFont,sans-serif;padding:24px;color:#05334b">PDF 產生中，請稍候...</body>');
   }
+  const useMobileExport=window.matchMedia('(max-width: 840px)').matches;
+  const exportWidth=useMobileExport?560:794;
   const cloneWrap=document.createElement('div');
-  cloneWrap.className='pdf-export-clone';
+  cloneWrap.className=`pdf-export-clone${useMobileExport?' pdf-export-mobile':''}`;
   const clone=page.cloneNode(true);
   clone.querySelectorAll('.table-edit').forEach(el=>el.remove());
   cloneWrap.appendChild(clone);
@@ -1040,8 +1042,8 @@ async function downloadPDF(){
       backgroundColor:'#ffffff',
       scrollX:0,
       scrollY:0,
-      windowWidth:794,
-      width:794,
+      windowWidth:exportWidth,
+      width:exportWidth,
       height:clone.scrollHeight
     });
     const pdf=new jsPDF({unit:'pt',format:'a4',orientation:'portrait'});
