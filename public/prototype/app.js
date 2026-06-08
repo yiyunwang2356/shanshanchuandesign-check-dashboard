@@ -1035,7 +1035,17 @@ async function downloadPDF(){
       margin:0,
       filename,
       image:{type:'jpeg',quality:0.98},
-      html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff',scrollX:0,scrollY:0,windowWidth:1200},
+      html2canvas:{
+        scale:2,
+        useCORS:true,
+        backgroundColor:'#ffffff',
+        scrollX:0,
+        scrollY:0,
+        x:0,
+        y:0,
+        width:794,
+        windowWidth:794
+      },
       jsPDF:{unit:'pt',format:'a4',orientation:'portrait'},
       pagebreak:{mode:['avoid-all','css','legacy']}
     }).from(clone).toPdf();
