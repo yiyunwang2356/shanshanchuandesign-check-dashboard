@@ -529,7 +529,18 @@ button,:where([role="button"]){transition:opacity var(--t),background var(--t),c
 .pdf-export-clone .pdf-letterhead{grid-template-columns:170px 1fr!important;gap:var(--s8)!important}
 .pdf-export-clone .pdf-report-meta{text-align:right!important;justify-items:end!important}
 .pdf-export-clone .pdf-report-meta .pdf-info-grid{grid-template-columns:repeat(2,minmax(120px,1fr))!important}
-.pdf-export-clone .pdf-footer{margin-top:auto!important;padding-top:24px!important}
+.pdf-export-clone .pdf-footer{
+  display:grid!important;grid-template-columns:1fr auto!important;align-items:end!important;
+  gap:24px!important;margin-top:auto!important;padding-top:30px!important;
+}
+.pdf-export-clone .pdf-footer-text{
+  align-self:end!important;line-height:1.4!important;padding-bottom:1px!important;
+}
+.pdf-export-clone .pdf-signature-row{
+  display:flex!important;justify-content:flex-end!important;gap:42px!important;align-items:end!important;
+}
+.pdf-export-clone .pdf-sign-box{padding-top:34px!important}
+.pdf-export-clone .pdf-sign-line{width:120px!important}
 .pdf-export-clone .table-edit{display:none!important}
 .pdf-btn:disabled{opacity:0.65;cursor:wait}
 .logo-fallback{font-size:1.1rem;font-weight:700;color:#05334b;letter-spacing:0}
