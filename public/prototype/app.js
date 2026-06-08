@@ -1008,7 +1008,7 @@ async function downloadPDF(){
   if(!page) return;
   const jsPDF=window.jspdf?.jsPDF;
   if(!window.html2canvas||!jsPDF){
-    alert('PDF 套件尚未載入完成，請稍等幾秒後再試一次。');
+    alert('PDF 套件尚未載入完成，請重新整理頁面後再試一次。');
     return;
   }
   const p=projects.find(x=>x.id===curProjId);
