@@ -245,6 +245,31 @@ async function handleLogin(e){
     btn.disabled=false;
   }
 }
+
+function restoreAuthSession(){
+  if(!window.firebase||!firebaseConfig?.apiKey) return;
+  let auth;
+  try{
+    auth=initFirebaseAuth();
+  }catch(error){
+    console.warn('Firebase auth restore skipped',error);
+    return;
+  }
+  if(!auth) return;
+  auth.setPersistence(window.firebase.auth.Auth.Persistence.LOCAL).catch(console.warn);
+  auth.onAuthStateChanged(async user=>{
+    if(!user) return;
+    try{
+      await loadFirebaseData();
+      refreshCurrentView();
+      showPage('app');
+      showView('projects');
+    }catch(error){
+      showCloudError(error);
+    }
+  });
+}
+
 function showPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
@@ -1257,4 +1282,5 @@ function setupLogoFallbacks(){
   populateTradeSelects();
   syncProjectHeader();
   updateBadges();
+  restoreAuthSession();
 })();
