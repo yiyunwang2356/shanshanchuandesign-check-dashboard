@@ -402,8 +402,8 @@ button,:where([role="button"]){transition:opacity var(--t),background var(--t),c
 .pdf-tab{padding:10px var(--s6);font-size:0.8125rem;font-weight:600;color:#aeaeb2;cursor:pointer;border-bottom:2px solid transparent;transition:color var(--t),border-color var(--t);white-space:nowrap}
 .pdf-tab.active{color:#05334b;border-bottom-color:#05334b}
 
-.pdf-page{display:none;width:794px;min-height:1123px;margin:0 auto;padding:48px 56px;background:#fff}
-.pdf-page.active{display:block}
+.pdf-page{display:none;width:794px;min-height:1123px;margin:0 auto;padding:48px 56px;background:#fff;flex-direction:column}
+.pdf-page.active{display:flex}
 
 /* ── PDF SHARED ── */
 .pdf-letterhead{display:grid;grid-template-columns:170px 1fr;align-items:start;gap:var(--s8);padding-bottom:var(--s4);border-bottom:2px solid #05334b;margin-bottom:var(--s5)}
@@ -454,7 +454,7 @@ button,:where([role="button"]){transition:opacity var(--t),background var(--t),c
 .pdf-status-badge{display:inline-block;padding:2px 9px;border-radius:5px;font-size:10.5px;font-weight:700}
 .pdf-badge-pending{background:#fff3e0;color:#e65100}
 .pdf-badge-done{background:#e8f5e9;color:#2e7d32}
-.pdf-footer{margin-top:86px;padding-top:30px;border-top:1px solid #d8d8d8;display:flex;align-items:flex-end;justify-content:space-between}
+.pdf-footer{margin-top:auto;padding-top:30px;border-top:1px solid #d8d8d8;display:flex;align-items:flex-end;justify-content:space-between;gap:24px}
 .pdf-footer-text{font-size:10.5px;color:#bbb}
 .pdf-footer-addendum{flex-direction:column-reverse;align-items:stretch;gap:22px}
 .pdf-footer-addendum .pdf-signature-row{justify-content:flex-end}
@@ -521,7 +521,7 @@ button,:where([role="button"]){transition:opacity var(--t),background var(--t),c
   display:block;width:515px;background:#fff;overflow:visible;
 }
 .pdf-export-content{
-  display:block!important;width:515px!important;min-height:0!important;
+  display:flex!important;flex-direction:column;width:515px!important;min-height:770px!important;
   margin:0!important;padding:0!important;background:#fff!important;
 }
 .pdf-export-clone .pdf-table .col-img,
@@ -529,7 +529,7 @@ button,:where([role="button"]){transition:opacity var(--t),background var(--t),c
 .pdf-export-clone .pdf-letterhead{grid-template-columns:170px 1fr!important;gap:var(--s8)!important}
 .pdf-export-clone .pdf-report-meta{text-align:right!important;justify-items:end!important}
 .pdf-export-clone .pdf-report-meta .pdf-info-grid{grid-template-columns:repeat(2,minmax(120px,1fr))!important}
-.pdf-export-clone .pdf-footer{margin-top:52px!important;padding-top:24px!important}
+.pdf-export-clone .pdf-footer{margin-top:auto!important;padding-top:24px!important}
 .pdf-export-clone .table-edit{display:none!important}
 .pdf-btn:disabled{opacity:0.65;cursor:wait}
 .logo-fallback{font-size:1.1rem;font-weight:700;color:#05334b;letter-spacing:0}

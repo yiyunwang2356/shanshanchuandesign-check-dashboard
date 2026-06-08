@@ -982,7 +982,8 @@ async function downloadPDF(){
   renderPDF();
   const page=document.querySelector('.pdf-page.active');
   if(!page) return;
-  if(!window.html2pdf){
+  const jsPDF=window.jspdf?.jsPDF;
+  if(!window.html2canvas||!jsPDF){
     window.print();
     return;
   }
@@ -993,7 +994,7 @@ async function downloadPDF(){
   const originalHtml=button?.innerHTML||'下載 PDF';
   if(button){
     button.disabled=true;
-    button.textContent='產生中...';
+    button.textContent='開啟中...';
   }
   const cloneWrap=document.createElement('div');
   cloneWrap.className='pdf-export-clone';
@@ -1007,14 +1008,36 @@ async function downloadPDF(){
   cloneWrap.appendChild(exportPage);
   document.body.appendChild(cloneWrap);
   try{
-    await window.html2pdf().set({
-      margin:[36,40,36,40],
-      filename,
-      image:{type:'jpeg',quality:0.98},
-      html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff',scrollX:0,scrollY:0},
-      jsPDF:{unit:'pt',format:'a4',orientation:'portrait'},
-      pagebreak:{mode:['css','legacy'],avoid:['tr','.trade-group','.pdf-footer']}
-    }).from(exportPage).save();
+    const canvas=await window.html2canvas(exportPage,{
+      scale:2,
+      useCORS:true,
+      backgroundColor:'#ffffff',
+      scrollX:0,
+      scrollY:0
+    });
+    const pdf=new jsPDF({unit:'pt',format:'a4',orientation:'portrait'});
+    const pageW=pdf.internal.pageSize.getWidth();
+    const pageH=pdf.internal.pageSize.getHeight();
+    const margin={top:36,right:40,bottom:36,left:40};
+    const contentW=pageW-margin.left-margin.right;
+    const contentH=pageH-margin.top-margin.bottom;
+    const imgH=canvas.height*contentW/canvas.width;
+    const imgData=canvas.toDataURL('image/jpeg',0.98);
+    const pageCount=Math.max(1,Math.ceil(Math.max(0,imgH-8)/contentH));
+
+    for(let i=0;i<pageCount;i++){
+      if(i>0) pdf.addPage();
+      pdf.addImage(imgData,'JPEG',margin.left,margin.top-(i*contentH),contentW,imgH);
+    }
+    pdf.setProperties({title:filename.replace(/\.pdf$/,'')});
+    const blobUrl=URL.createObjectURL(pdf.output('blob'));
+    const opened=window.open(blobUrl,'_blank','noopener,noreferrer');
+    if(!opened){
+      pdf.save(filename);
+      URL.revokeObjectURL(blobUrl);
+    }else{
+      setTimeout(()=>URL.revokeObjectURL(blobUrl),60000);
+    }
   }catch(error){
     console.error('PDF download failed',error);
     alert('PDF 下載失敗，將改用列印功能。請在列印視窗選擇「另存為 PDF」。');
