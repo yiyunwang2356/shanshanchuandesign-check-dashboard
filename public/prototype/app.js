@@ -172,9 +172,15 @@ async function loadFirebaseData(){
 }
 
 async function loadMembersData(){
-  if(!firebaseDb) return;
   setMembersStatus('正在讀取 members...', '');
   try{
+    if(!firebaseDb){
+      initFirebaseServices();
+    }
+    if(!firebaseDb){
+      setMembersStatus('Firebase 尚未準備完成，先使用預設名單。','warn');
+      return;
+    }
     const snapshot=await firebaseDb.collection('members').get();
     if(snapshot.empty){
       setMembersStatus('Firestore 的 members 集合目前沒有資料，先使用預設名單。','warn');
