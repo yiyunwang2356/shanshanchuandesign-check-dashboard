@@ -982,11 +982,6 @@ async function downloadPDF(){
   renderPDF();
   const page=document.querySelector('.pdf-page.active');
   if(!page) return;
-  const jsPDF=window.jspdf?.jsPDF;
-  if(!window.html2canvas||!jsPDF){
-    window.print();
-    return;
-  }
   const p=projects.find(x=>x.id===curProjId);
   const isAddendum=page.id==='pdf-page-1';
   const filename=`${safeFileName(p?.name)}-${isAddendum?'工程追加單':'驗收缺失報告'}.pdf`;
@@ -996,56 +991,42 @@ async function downloadPDF(){
     button.disabled=true;
     button.textContent='開啟中...';
   }
-  const previewWindow=window.open('','_blank');
-  if(previewWindow){
-    previewWindow.document.write('<!doctype html><title>PDF 產生中...</title><body style="font-family:-apple-system,BlinkMacSystemFont,sans-serif;padding:24px;color:#05334b">PDF 產生中...</body>');
-  }
-  const cloneWrap=document.createElement('div');
-  cloneWrap.className='pdf-export-clone';
-  const exportPage=document.createElement('div');
-  exportPage.className='pdf-export-page';
-  const clone=page.cloneNode(true);
-  clone.classList.remove('pdf-page','active');
-  clone.classList.add('pdf-export-content');
-  clone.querySelectorAll('.table-edit').forEach(el=>el.remove());
-  exportPage.appendChild(clone);
-  cloneWrap.appendChild(exportPage);
-  document.body.appendChild(cloneWrap);
   try{
-    const canvas=await window.html2canvas(exportPage,{
-      scale:3,
-      useCORS:true,
-      backgroundColor:'#ffffff',
-      scrollX:0,
-      scrollY:0
-    });
-    const pdf=new jsPDF({unit:'pt',format:'a4',orientation:'portrait'});
-    const pageW=pdf.internal.pageSize.getWidth();
-    const pageH=pdf.internal.pageSize.getHeight();
-    const imgH=canvas.height*pageW/canvas.width;
-    const imgData=canvas.toDataURL('image/png');
-    const pageCount=Math.max(1,Math.ceil(Math.max(0,imgH-8)/pageH));
-
-    for(let i=0;i<pageCount;i++){
-      if(i>0) pdf.addPage();
-      pdf.addImage(imgData,'PNG',0,-(i*pageH),pageW,imgH);
+    const opened=window.open('','_blank');
+    if(!opened){
+      window.print();
+      return;
     }
-    pdf.setProperties({title:filename.replace(/\.pdf$/,'')});
-    const blobUrl=URL.createObjectURL(pdf.output('blob'));
-    if(previewWindow){
-      previewWindow.location.href=blobUrl;
-      setTimeout(()=>URL.revokeObjectURL(blobUrl),60000);
-    }else{
-      pdf.save(filename);
-      URL.revokeObjectURL(blobUrl);
-    }
+    const clone=page.cloneNode(true);
+    clone.classList.remove('active');
+    clone.querySelectorAll('.table-edit').forEach(el=>el.remove());
+    opened.document.open();
+    opened.document.write(`<!doctype html>
+      <html lang="zh-TW">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${filename.replace(/\.pdf$/,'')}</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Noto+Serif+TC:wght@400;600&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="styles.css">
+        <style>
+          html,body{height:auto!important;overflow:auto!important;background:#f5f5f7!important}
+          body{padding:24px}
+          .pdf-page{display:flex!important}
+          .table-edit,.pdf-topbar,.pdf-tabs{display:none!important}
+          @media print{body{padding:0;background:#fff!important}.pdf-page{box-shadow:none!important}}
+        </style>
+      </head>
+      <body>${clone.outerHTML}</body>
+      </html>`);
+    opened.document.close();
   }catch(error){
     console.error('PDF download failed',error);
-    if(previewWindow) previewWindow.close();
     alert('PDF 下載失敗，將改用列印功能。請在列印視窗選擇「另存為 PDF」。');
     window.print();
   }finally{
-    cloneWrap.remove();
     if(button){
       button.disabled=false;
       button.innerHTML=originalHtml;
